@@ -21,6 +21,9 @@
   .btn{background:var(--accent);border:none;color:#062027;font-weight:800;padding:12px 14px;border-radius:12px;cursor:pointer}
   .btn:active{transform:translateY(1px)}
   .btn.alt{background:#153943;color:#cdeee7;border:1px solid #24535f}
+  .tabs{display:flex;gap:8px;margin:8px 0}
+  .tab{padding:6px 10px;border-radius:999px;border:1px solid #24535f;background:#0a1d23;color:#bfeee4;cursor:pointer}
+  .tab.active{background:var(--accent);color:#062027;border-color:#2ad5bb}
   .field{display:grid;gap:6px}
   input[type="text"],input[type="file"],input[type="password"],select{
     background:#0a1d24;border:1px solid #173842;color:var(--ink);
@@ -29,6 +32,7 @@
   .muted{color:var(--muted);font-size:13px}
   .center{display:grid;place-items:center;text-align:center}
   .pfp{width:84px;height:84px;border-radius:16px;object-fit:cover;border:1px solid #23444f;background:#0b1e25}
+  .pfpMini{width:28px;height:28px;border-radius:6px;object-fit:cover;border:1px solid #23444f;background:#0b1e25}
   .row{display:flex;gap:8px;align-items:center}
   .tiny{font-size:12px;color:var(--muted);cursor:pointer}
   .qtxt{font-size:20px;font-weight:700;margin:0 0 10px}
@@ -41,11 +45,7 @@
   .option:hover{border-color:#2a5d6b}
   .option.correct{border-color:var(--good);box-shadow:0 0 0 2px rgba(31,211,143,.15)}
   .option.wrong{border-color:var(--bad);box-shadow:0 0 0 2px rgba(255,107,107,.12)}
-
-  /* ✅ Force option text to white everywhere */
-  .option,
-  .option *{ color:var(--ink) !important; }
-
+  .option,.option *{color:var(--ink)!important}
   .option:focus-visible{outline:2px solid #2a5d6b;outline-offset:2px}
 
   .hud{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 14px}
@@ -73,6 +73,7 @@
     <div class="spacer"></div>
     <button class="btn alt logout" id="logoutBtn">Logout</button>
     <div class="logo" title="Fermah">
+      <!-- Inline logo -->
       <svg viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <path fill="#17C8A5" d="M6 8c0-3.3 2.7-6 6-6h76c3.3 0 6 2.7 6 6v8c0 3.3-2.7 6-6 6H62v44h8c3.3 0 6 2.7 6 6v6H56V22H44v56H24v-6c0-3.3 2.7-6 6-6h8V22H12c-3.3 0-6-2.7-6-6V8z"/>
         <rect x="20" y="68" width="14" height="10" rx="2" fill="#17C8A5"/>
@@ -105,6 +106,29 @@
       </div>
     </div>
     <div class="muted">Profiles are stored locally on this device (passwords are hashed with SHA-256).</div>
+  </section>
+
+  <!-- PROFILE (shown after YES) -->
+  <section id="profile" class="card" style="display:none">
+    <div class="grid two" style="align-items:center">
+      <div class="center">
+        <img id="proPfp" class="pfp" alt="">
+        <div style="font-weight:800;margin-top:8px" id="proName"></div>
+        <div class="muted" id="proLocal"></div>
+      </div>
+      <div>
+        <div class="qtxt" style="margin:0 0 6px">Your Stats</div>
+        <div class="row" style="flex-wrap:wrap">
+          <span class="chip" id="statBest">Best IQ: —</span>
+          <span class="chip" id="statGames">Games: —</span>
+          <span class="chip" id="statToday">Today rank: —</span>
+        </div>
+        <div class="grid two" style="margin-top:12px">
+          <button class="btn" id="startQuizBtn">Start Quiz</button>
+          <button class="btn alt" id="profileBoardBtn">View Leaderboard</button>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- QUIZ -->
@@ -144,7 +168,11 @@
 
   <!-- LEADERBOARD -->
   <section id="board" class="card" style="display:none">
-    <div class="qtxt">Leaderboard</div>
+    <div class="qtxt">Global Leaderboard</div>
+    <div class="tabs">
+      <button class="tab active" id="tabAll">All-time</button>
+      <button class="tab" id="tabToday">Today</button>
+    </div>
     <table id="boardTable">
       <thead><tr><th>#</th><th>Player</th><th>Score</th><th>Time</th><th>IQ</th><th>Date</th></tr></thead>
       <tbody></tbody>
@@ -168,34 +196,43 @@
   Made by <b>FreeGuyx247</b> • Community fan project (not official).
 </footer>
 
-<script>
+<script type="module">
+/* ---------- Firebase (global leaderboard) ---------- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDAiqIm1PqUUI8xlc7zglj_VdU1tdOzHIU",
+  authDomain: "fermah---quiz.firebaseapp.com",
+  projectId: "fermah---quiz",
+  storageBucket: "fermah---quiz.firebasestorage.app",
+  messagingSenderId: "507235503669",
+  appId: "1:507235503669:web:f095ca4818998071efeb7c",
+  measurementId: "G-ZY9KD6CNL5"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
 /* ---------- Local storage keys ---------- */
 const LS_PROFILES='fermah_profiles_v2';
 const LS_LAST='fermah_last_user';
 const LS_BOARD='fermah_leaderboard';
-
 const $ = s=>document.querySelector(s), $$ = s=>document.querySelectorAll(s);
 
 let currentUser=null, quizSize=20, timerId=null, questions=[], idx=0, score=0, startTs=0;
 
-/* ---------- Simple sounds (WebAudio) ---------- */
-let actx=null;
-function ctx(){ return actx||(actx=new (window.AudioContext||window.webkitAudioContext)()); }
-function beep(freq=880, dur=0.18, type='sine', vol=0.2){
-  const a=ctx(); const o=a.createOscillator(); const g=a.createGain();
-  o.type=type; o.frequency.value=freq; g.gain.value=vol; o.connect(g); g.connect(a.destination); o.start();
-  g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime+dur); o.stop(a.currentTime+dur+0.02);
-}
+/* ---------- Sounds ---------- */
+let actx=null; function ctx(){ return actx||(actx=new (window.AudioContext||window.webkitAudioContext)()); }
+function beep(freq=880, dur=0.18, type='sine', vol=0.2){ const a=ctx(); const o=a.createOscillator(); const g=a.createGain(); o.type=type; o.frequency.value=freq; g.gain.value=vol; o.connect(g); g.connect(a.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime+dur); o.stop(a.currentTime+dur+0.02); }
 function successSound(){ beep(880,0.12,'triangle',0.25); setTimeout(()=>beep(1320,0.14,'triangle',0.22),120); }
 function sadSound(){ beep(420,0.16,'sawtooth',0.18); setTimeout(()=>beep(300,0.22,'sawtooth',0.16),160); }
 
-/* ---------- Modal helpers ---------- */
+/* ---------- Modal ---------- */
 function modal({title,msg,buttons}) {
   $('#mTitle').textContent=title; $('#mMsg').innerHTML=msg;
   const c=$('#mBtns'); c.innerHTML='';
   (buttons||[{label:'OK'}]).forEach(b=>{
-    const el=document.createElement('button');
-    el.className='btn '+(b.alt?'alt':''); el.textContent=b.label;
+    const el=document.createElement('button'); el.className='btn '+(b.alt?'alt':''); el.textContent=b.label;
     el.onclick=()=>{ $('#modalWrap').style.display='none'; b.onClick&&b.onClick(); };
     c.appendChild(el);
   });
@@ -205,15 +242,21 @@ function modal({title,msg,buttons}) {
 /* ---------- Utils ---------- */
 function loadProfiles(){ try{return JSON.parse(localStorage.getItem(LS_PROFILES)||'[]')}catch{return[]} }
 function saveProfiles(arr){ localStorage.setItem(LS_PROFILES, JSON.stringify(arr)) }
-function refreshLoginSelect(){
-  const sel=$('#loginSelect'); sel.innerHTML='';
-  loadProfiles().forEach((p,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=p.name+(p.passHash?'':' (no pw)'); sel.appendChild(o); })
-}
+function refreshLoginSelect(){ const sel=$('#loginSelect'); sel.innerHTML=''; loadProfiles().forEach((p,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=p.name+(p.passHash?'':' (no pw)'); sel.appendChild(o); }) }
 async function fileToDataURL(f){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); }) }
-async function sha256(text){
-  const buf = new TextEncoder().encode(text);
-  const hash = await crypto.subtle.digest('SHA-256', buf);
-  return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('');
+async function sha256(text){ const buf = new TextEncoder().encode(text); const hash = await crypto.subtle.digest('SHA-256', buf); return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join(''); }
+function yyyy_mm_dd(ts=Date.now()){ const d=new Date(ts); const m=('0'+(d.getMonth()+1)).slice(-2), day=('0'+d.getDate()).slice(-2); return `${d.getFullYear()}-${m}-${day}`; }
+
+/* Create a 48x48 pfp thumbnail (to store globally) */
+function makeThumb(dataURL, size=48){
+  return new Promise(res=>{
+    if(!dataURL) return res('');
+    const img=new Image(); img.onload=()=>{
+      const c=document.createElement('canvas'); c.width=size; c.height=size;
+      const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,size,size);
+      res(c.toDataURL('image/jpeg',0.7));
+    }; img.src=dataURL;
+  });
 }
 
 /* ---------- Create / Login / Logout ---------- */
@@ -249,34 +292,67 @@ $('#loginBtn').onclick=async ()=>{
   const input=$('#passLogin').value;
   if(!user.passHash){
     if(input!=='') return alert('This profile has no password. Leave it blank to login and then set one.');
-    currentUser={name:user.name, pfp:user.pfp||''};
-    askStart();
   } else {
     const hash = await sha256(input);
     if(hash!==user.passHash) return alert('Wrong password');
-    currentUser={name:user.name, pfp:user.pfp||''};
-    localStorage.setItem(LS_LAST, user.name);
-    askStart();
   }
+  currentUser={name:user.name, pfp:user.pfp||''};
+  localStorage.setItem(LS_LAST, user.name);
+  askStart();
 };
 
 function askStart(){
   $('#logoutBtn').style.display='inline-block';
   modal({
     title:'🧠 Ready to Test Your IQ?',
-    msg:'We’ll give you 20 questions. Answer fast for a time bonus!',
+    msg:'We’ll take you to your profile first to review stats, then you can start when ready.',
     buttons:[
       {label:'NO 😞', alt:true, onClick:()=>{ sadSound(); }},
-      {label:'YES, let’s go!', onClick:()=>{ successSound(); startQuiz(); }}
+      {label:'YES', onClick:()=>{ successSound(); openProfile(); }}
     ]
   });
 }
 
 $('#logoutBtn').onclick=()=>{
   currentUser=null;
-  $('#quiz').style.display='none'; $('#result').style.display='none'; $('#board').style.display='none';
-  $('#login').style.display='block'; $('#logoutBtn').style.display='none';
+  showOnly('login'); $('#logoutBtn').style.display='none';
 };
+
+function showOnly(id){
+  for(const s of ['login','profile','quiz','result','board']) $('#'+s).style.display = (s===id)?'block':'none';
+}
+
+/* ---------- Profile screen ---------- */
+async function openProfile(){
+  if(!currentUser) return;
+  $('#proName').textContent=currentUser.name;
+  $('#proPfp').src=currentUser.pfp||'';
+  // local last result
+  const last = (JSON.parse(localStorage.getItem(LS_BOARD)||'[]'))[0];
+  $('#proLocal').textContent = last ? `Last: ${last.score}/${last.total} • ${last.secs}s • IQ ${last.iq}` : 'No games yet';
+  showOnly('profile'); $('#logoutBtn').style.display='inline-block';
+  await refreshProfileStats();
+}
+async function refreshProfileStats(){
+  try{
+    const lbRef = collection(db,'leaderboard');
+    const qMine = query(lbRef, where('name','==', currentUser.name), orderBy('iq','desc'), limit(25));
+    const snap = await getDocs(qMine);
+    let best = 0, games=0;
+    snap.forEach(d=>{ const v=d.data(); best = Math.max(best, v.iq||0); games++; });
+    $('#statBest').textContent = `Best IQ: ${best||'—'}`;
+    $('#statGames').textContent = `Games: ${games||0}`;
+    // today rank (approx: top 100 today)
+    const today = yyyy_mm_dd();
+    const qToday = query(lbRef, where('day','==',today), orderBy('iq','desc'), limit(100));
+    const tSnap = await getDocs(qToday);
+    let rank = '—'; let pos=1;
+    tSnap.forEach(d=>{ const v=d.data(); if(rank==='—' && v.name===currentUser.name) rank=pos; pos++; });
+    $('#statToday').textContent = `Today rank: ${rank}`;
+  }catch(e){ console.log(e); }
+}
+$('#startQuizBtn').onclick = ()=> startQuiz();
+$('#profileBoardBtn').onclick = ()=> { showOnly('board'); loadGlobalBoard('all'); };
 
 /* ---------- Question bank (sample) ---------- */
 const BANK=[
@@ -301,18 +377,12 @@ const BANK=[
  {q:"What does vendor lock-in risk?", a:["Portability & negotiation power","Gas refunds","Wallet UX","Bridging"], i:0},
  {q:"Transparency in proof pricing helps…", a:["Forecast costs","SPAM","Sequencers stall","Nothing"], i:0},
 ];
-
 function pickRandom(n, arr=BANK){ const a=[...arr]; a.sort(()=>Math.random()-0.5); return a.slice(0,n); }
 
 /* ---------- Quiz engine ---------- */
 function startQuiz(){
-  $('#login').style.display='none'; $('#result').style.display='none'; $('#board').style.display='none'; $('#quiz').style.display='block';
-  $('#hudUser').textContent=`👤 ${currentUser.name}`; $('#hudScore').textContent=0; $('#hudTotal').textContent=quizSize; $('#hudTime').textContent='0s';
-
-  questions = pickRandom(quizSize).map(q=>{
-    const opts=[...q.a].map((t,i)=>({t,i})); opts.sort(()=>Math.random()-0.5);
-    return {q:q.q, opts, correct:opts.findIndex(o=>o.i===q.i)};
-  });
+  showOnly('quiz'); $('#hudUser').textContent=`👤 ${currentUser.name}`; $('#hudScore').textContent=0; $('#hudTotal').textContent=quizSize; $('#hudTime').textContent='0s';
+  questions = pickRandom(quizSize).map(q=>{ const opts=[...q.a].map((t,i)=>({t,i})); opts.sort(()=>Math.random()-0.5); return {q:q.q, opts, correct:opts.findIndex(o=>o.i===q.i)}; });
   idx=0; score=0; startTs=Date.now();
   if(timerId) clearInterval(timerId);
   timerId=setInterval(()=>$('#hudTime').textContent=Math.floor((Date.now()-startTs)/1000)+'s',250);
@@ -333,36 +403,68 @@ function selectAnswer(i,btn){
 }
 $('#skipBtn').onclick=()=>{ idx++; showQuestion(); };
 
-function endQuiz(){
+async function endQuiz(){
   clearInterval(timerId);
   const total=questions.length, secs=Math.floor((Date.now()-startTs)/1000)||1, acc=score/total;
   const iq=Math.round(60+40*acc+Math.min(20,200/secs));
-  $('#quiz').style.display='none'; $('#result').style.display='block';
+  showOnly('result');
   $('#resName').textContent=currentUser.name; $('#resPfp').src=currentUser.pfp||''; $('#resTag').textContent=`${score}/${total} correct • ${secs}s`;
   $('#resIQ').textContent=iq; $('#resSummary').textContent=`Accuracy ${(acc*100).toFixed(0)}% • Time bonus applied.`;
-  saveToBoard({name:currentUser.name, pfp:currentUser.pfp, score,total,secs,iq,ts:Date.now()});
+
+  const entry = {name:currentUser.name, score, total, secs, iq, ts:Date.now(), day:yyyy_mm_dd(), pfpThumb: await makeThumb(currentUser.pfp||'')};
+
+  // local save (also used for "last" on profile)
+  const l = (JSON.parse(localStorage.getItem(LS_BOARD)||'[]')); l.unshift(entry); localStorage.setItem(LS_BOARD, JSON.stringify(l.slice(0,100)));
+
+  // global save
+  try{ await addDoc(collection(db,'leaderboard'), entry); } catch(e){ console.log('global save failed',e); }
+
+  successSound();
 }
 
-/* ---------- Leaderboard (local) ---------- */
-function loadBoard(){ try{return JSON.parse(localStorage.getItem(LS_BOARD)||'[]')}catch{return[]} }
-function saveBoard(l){ localStorage.setItem(LS_BOARD, JSON.stringify(l)) }
-function saveToBoard(e){ const l=loadBoard(); l.push(e); l.sort((a,b)=>b.iq-a.iq||a.secs-b.secs); saveBoard(l.slice(0,100)); }
-function renderBoard(){
-  const tb=$('#boardTable tbody'); tb.innerHTML='';
-  loadBoard().forEach((r,i)=>{
-    const tr=document.createElement('tr'); tr.innerHTML=`
-      <td>${i+1}</td>
-      <td><span style="display:inline-flex;align-items:center;gap:8px">
-        ${r.pfp?`<img src="${r.pfp}" class="pfp" style="width:28px;height:28px;border-radius:6px">`:''}${r.name}</span></td>
-      <td>${r.score}/${r.total}</td><td>${r.secs}s</td><td>${r.iq}</td>
-      <td>${new Date(r.ts).toLocaleDateString()}</td>`; tb.appendChild(tr);
-  });
+/* ---------- Global Leaderboard ---------- */
+async function loadGlobalBoard(scope='all'){
+  const tb=$('#boardTable tbody'); tb.innerHTML='<tr><td colspan="6" class="muted">Loading…</td></tr>';
+  try{
+    const lbRef = collection(db,'leaderboard');
+    let qRef;
+    if(scope==='today'){
+      qRef = query(lbRef, where('day','==', yyyy_mm_dd()), orderBy('iq','desc'), orderBy('secs','asc'), limit(100));
+    } else {
+      qRef = query(lbRef, orderBy('iq','desc'), orderBy('secs','asc'), limit(100));
+    }
+    const snap = await getDocs(qRef);
+    tb.innerHTML='';
+    let i=1; snap.forEach(d=>{
+      const r=d.data();
+      const when = new Date(r.ts||Date.now()).toLocaleDateString();
+      const pfp = r.pfpThumb?`<img src="${r.pfpThumb}" class="pfpMini">`:'';
+      const tr=document.createElement('tr');
+      tr.innerHTML = `<td>${i++}</td>
+        <td><span style="display:inline-flex;align-items:center;gap:8px">${pfp}${r.name||'—'}</span></td>
+        <td>${r.score}/${r.total}</td><td>${r.secs}s</td><td>${r.iq}</td><td>${when}</td>`;
+      tb.appendChild(tr);
+    });
+    if(!tb.children.length){ tb.innerHTML='<tr><td colspan="6" class="muted">No entries yet.</td></tr>'; }
+  }catch(e){
+    console.log(e);
+    tb.innerHTML='<tr><td colspan="6" class="muted">Could not load global board (check Firestore rules or indexes).</td></tr>';
+  }
 }
-$('#viewBoard').onclick=()=>{ $('#result').style.display='none'; $('#board').style.display='block'; renderBoard(); };
-$('#backHome').onclick=()=>{ $('#board').style.display='none'; $('#login').style.display='block'; $('#logoutBtn').style.display='none'; };
 
-/* Auto-prefill login list */
-window.addEventListener('DOMContentLoaded', refreshLoginSelect);
+/* Tabs */
+$('#tabAll').onclick=()=>{ $('#tabAll').classList.add('active'); $('#tabToday').classList.remove('active'); loadGlobalBoard('all'); }
+$('#tabToday').onclick=()=>{ $('#tabToday').classList.add('active'); $('#tabAll').classList.remove('active'); loadGlobalBoard('today'); }
+
+/* Result buttons & board nav */
+$('#viewBoard').onclick=()=>{ showOnly('board'); loadGlobalBoard('all'); };
+$('#backHome').onclick=()=>{ showOnly('login'); $('#logoutBtn').style.display='none'; };
+$('#playAgain').onclick=()=>{ openProfile(); };
+
+/* Init */
+window.addEventListener('DOMContentLoaded', ()=>{
+  refreshLoginSelect();
+});
 </script>
 </body>
 </html>
