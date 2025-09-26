@@ -29,7 +29,6 @@
   input[type="file"]{display:none}
   .fileRow{display:flex;align-items:center;gap:10px}
   .fileName{font-size:12px;color:var(--muted)}
-  .muted{color:var(--muted);font-size:13px}
   .center{display:grid;place-items:center;text-align:center}
   .pfp{width:84px;height:84px;border-radius:16px;object-fit:cover;border:1px solid #23444f;background:#0b1e25}
   .row{display:flex;gap:8px;align-items:center}
@@ -42,19 +41,8 @@
   .option.wrong{border-color:var(--bad);box-shadow:0 0 0 2px rgba(255,107,107,.12)}
   .hud{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 14px}
   .chip{background:#0a1d23;border:1px solid #173741;color:#bfeee4;padding:6px 10px;border-radius:999px;font-size:13px}
-  table{width:100%;border-collapse:collapse}
-  th,td{padding:10px;border-bottom:1px solid #15353f;text-align:left;font-size:14px}
   footer{position:fixed;left:0;right:0;bottom:0;padding:10px 14px;text-align:center;color:#96cfc3;background:linear-gradient(180deg,transparent,rgba(0,0,0,.35))}
   footer b{color:#d8fff7}
-
-  /* Modal */
-  .modalWrap{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);z-index:50}
-  .modal{width:min(520px,92vw);background:linear-gradient(180deg,#0f2730,#0e2127);border:1px solid #18404a;border-radius:16px;padding:18px;box-shadow:0 14px 40px rgba(0,0,0,.4)}
-  .modal h3{margin:0 0 8px;font-size:22px}
-  .modal p{margin:0 0 14px;color:#bfeee4}
-  .modal .row{justify-content:flex-end}
-
-  /* home/profile hub */
   #home .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
   .tile{background:#0b1f26;border:1px solid #153c46;border-radius:12px;padding:12px;text-align:center}
   .tile b{display:block;font-size:18px}
@@ -69,29 +57,21 @@
     </div>
     <div class="spacer"></div>
     <button class="btn alt logout" id="logoutBtn">Logout</button>
-    <div class="logo" title="Fermah">
-      <!-- Fermah pi-like mark -->
-      <svg viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path fill="#17C8A5" d="M6 8c0-3.3 2.7-6 6-6h76c3.3 0 6 2.7 6 6v8c0 3.3-2.7 6-6 6H62v44h8c3.3 0 6 2.7 6 6v6H56V22H44v56H24v-6c0-3.3 2.7-6 6-6h8V22H12c-3.3 0-6-2.7-6-6V8z"/>
-        <rect x="20" y="68" width="14" height="10" rx="2" fill="#17C8A5"/>
-        <rect x="66" y="68" width="14" height="10" rx="2" fill="#17C8A5"/>
-      </svg>
-    </div>
   </header>
 
-  <!-- LOGIN / CREATE -->
+  <!-- LOGIN -->
   <section id="login" class="card grid">
     <div class="grid two">
       <div class="field">
         <label class="muted">Create account</label>
-        <input id="name" type="text" placeholder="Username (e.g. FreeGuyx247)" />
+        <input id="name" type="text" placeholder="Username" />
         <div class="fileRow">
           <input id="pfp" type="file" accept="image/png,image/jpeg" />
-          <label for="pfp" class="btn alt" style="margin:0">Choose Image</label>
+          <label for="pfp" class="btn alt">Choose Image</label>
           <span id="fileName" class="fileName">No image</span>
         </div>
         <div class="row">
-          <input id="passCreate" type="password" placeholder="Password (min 6 chars)" style="flex:1">
+          <input id="passCreate" type="password" placeholder="Password" style="flex:1">
           <span class="tiny" id="toggleCreate">Show</span>
         </div>
         <button class="btn" id="createBtn">Create & Continue</button>
@@ -108,7 +88,7 @@
     </div>
   </section>
 
-  <!-- HOME (profile hub) -->
+  <!-- HOME -->
   <section id="home" class="card" style="display:none">
     <div class="grid two" style="align-items:center">
       <div class="row" style="gap:12px">
@@ -120,7 +100,6 @@
       </div>
       <div class="row" style="justify-content:flex-end">
         <button class="btn" id="startQuizBtn">Start Quiz</button>
-        <button class="btn alt" id="goBoardBtn">Leaderboard</button>
       </div>
     </div>
     <div class="stats" style="margin-top:12px">
@@ -154,314 +133,81 @@
         <div class="muted" id="resTag"></div>
       </div>
       <div>
-        <div class="qtxt" style="margin:0 0 6px">Your Proof-IQ</div>
+        <div class="qtxt">Your Proof-IQ</div>
         <div id="resIQ" style="font-size:40px;font-weight:900;color:var(--accent)"></div>
         <div class="muted" id="resSummary"></div>
       </div>
     </div>
-
-    <!-- Shareable card preview -->
     <div class="grid" style="margin-top:12px">
-      <img id="cardPreview" alt="Share card" style="max-width:100%;border-radius:12px;border:1px solid #153c46;display:none"/>
+      <img id="cardPreview" style="max-width:100%;border-radius:12px;border:1px solid #153c46;display:none"/>
       <div class="row" id="shareRow" style="display:none;justify-content:flex-end">
-        <a id="dlCard" class="btn alt" download="fermah-quiz-card.png">Download Card</a>
+        <a id="dlCard" class="btn alt" download="fermah-quiz-card.png">Download</a>
         <button id="shareCard" class="btn">Share</button>
-        <a id="shareX" class="btn" target="_blank" rel="noopener">Share on X</a>
+        <a id="shareX" class="btn" target="_blank">Share on X</a>
       </div>
     </div>
-
-    <div class="grid two" style="margin-top:12px">
-      <button class="btn" id="playAgain">Play Again</button>
-      <button class="btn alt" id="viewBoard">View Leaderboard</button>
-    </div>
-  </section>
-
-  <!-- LEADERBOARD -->
-  <section id="board" class="card" style="display:none">
-    <div class="qtxt">Global Leaderboard</div>
-    <div class="row" style="gap:8px;margin:6px 0 10px">
-      <button class="btn" id="tabAll">All-time</button>
-      <button class="btn alt" id="tabToday">Today</button>
-    </div>
-    <table id="boardTable">
-      <thead><tr><th>#</th><th>Player</th><th>Score</th><th>Time</th><th>IQ</th><th>Date</th></tr></thead>
-      <tbody></tbody>
-    </table>
     <div class="grid" style="margin-top:12px">
-      <button class="btn alt" id="backHome">Back</button>
+      <button class="btn" id="playAgain">Back Home</button>
     </div>
   </section>
-</div>
-
-<!-- Modal -->
-<div id="modalWrap" class="modalWrap">
-  <div class="modal">
-    <h3 id="mTitle"></h3>
-    <p id="mMsg"></p>
-    <div class="row" id="mBtns"></div>
-  </div>
 </div>
 
 <footer>
   Made by <b>FreeGuyx247</b> • Community fan project (not official).
 </footer>
 
-<!-- Firebase (use your config) -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+<script>
+/* local storage */
+const LS_PROFILES='fermah_profiles_v3',LS_LAST='fermah_last_user';
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
 
-  /* 🔧 paste YOUR Firebase config below (from console) */
-  const firebaseConfig = {
-    apiKey: "YOUR_KEY",
-    authDomain: "YOUR_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_BUCKET",
-    messagingSenderId: "YOUR_SENDER",
-    appId: "YOUR_APP_ID",
-    measurementId: "YOUR_MEAS"
-  };
+let currentUser=null,quizSize=20,timerId=null,questions=[],idx=0,score=0,startTs=0;
 
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
+function show(id){['login','home','quiz','result'].forEach(x=>$('#'+x).style.display=x===id?'block':'none')}
+function refreshLoginSelect(){const sel=$('#loginSelect');sel.innerHTML='';loadProfiles().forEach((p,i)=>{const o=document.createElement('option');o.value=i;o.textContent=p.name;sel.appendChild(o)})}
+function loadProfiles(){try{return JSON.parse(localStorage.getItem(LS_PROFILES)||'[]')}catch{return[]}}
+function saveProfiles(a){localStorage.setItem(LS_PROFILES,JSON.stringify(a))}
+async function sha256(s){const b=new TextEncoder().encode(s);const h=await crypto.subtle.digest('SHA-256',b);return[...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const fileToDataURL=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)})
 
-  /* ---------- Local data ---------- */
-  const LS_PROFILES='fermah_profiles_v3';
-  const LS_LAST='fermah_last_user';
-  const $ = s=>document.querySelector(s), $$ = s=>document.querySelectorAll(s);
+$('#toggleCreate').onclick=()=>{$('#passCreate').type=$('#passCreate').type==='password'?'text':'password'}
+$('#toggleLogin').onclick=()=>{$('#passLogin').type=$('#passLogin').type==='password'?'text':'password'}
+$('#pfp').addEventListener('change',e=>{$('#fileName').textContent=e.target.files[0]?e.target.files[0].name:'No image'})
 
-  let currentUser=null, quizSize=20, timerId=null, questions=[], idx=0, score=0, startTs=0;
+$('#createBtn').onclick=async()=>{
+  const name=$('#name').value.trim(); if(!name)return alert('Enter username')
+  const pass=$('#passCreate').value; if(pass.length<6)return alert('Password too short')
+  const hash=await sha256(pass); const f=$('#pfp').files[0]; const pfp=f?await fileToDataURL(f):''
+  const list=loadProfiles(); if(list.some(p=>p.name.toLowerCase()===name.toLowerCase()))return alert('Exists')
+  list.push({name,pfp,passHash:hash}); saveProfiles(list); localStorage.setItem(LS_LAST,name); refreshLoginSelect()
+  alert('Account created, now login')
+}
 
-  /* ---------- sounds ---------- */
-  let actx=null; const ctx=()=>actx||(actx=new (window.AudioContext||window.webkitAudioContext)());
-  function beep(f=880,d=0.18,t='sine',v=0.2){const a=ctx(),o=a.createOscillator(),g=a.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(a.destination);o.start();g.gain.exponentialRampToValueAtTime(0.0001,a.currentTime+d);o.stop(a.currentTime+d+.02)}
-  const success=()=>{beep(880,.12,'triangle',.25);setTimeout(()=>beep(1320,.14,'triangle',.22),120)}
-  const sad=()=>{beep(420,.16,'sawtooth',.18);setTimeout(()=>beep(300,.22,'sawtooth',.16),160)}
+$('#loginBtn').onclick=async()=>{
+  const list=loadProfiles();const user=list[$('#loginSelect').value|0];if(!user)return
+  const input=$('#passLogin').value;const hash=await sha256(input);if(hash!==user.passHash)return alert('Wrong password')
+  currentUser=user;localStorage.setItem(LS_LAST,user.name);$('#homeName').textContent=user.name;$('#homePfp').src=user.pfp||'';updateStats();$('#logoutBtn').style.display='inline-block';show('home')
+}
+$('#logoutBtn').onclick=()=>{currentUser=null;$('#logoutBtn').style.display='none';show('login')}
 
-  /* ---------- modal ---------- */
-  function modal({title,msg,buttons}){$('#mTitle').textContent=title;$('#mMsg').innerHTML=msg;const c=$('#mBtns');c.innerHTML='';(buttons||[{label:'OK'}]).forEach(b=>{const el=document.createElement('button');el.className='btn '+(b.alt?'alt':'');el.textContent=b.label;el.onclick=()=>{$('#modalWrap').style.display='none';b.onClick&&b.onClick()};c.appendChild(el)});$('#modalWrap').style.display='grid'}
+$('#startQuizBtn').onclick=()=>startQuiz()
+$('#skipBtn').onclick=()=>{idx++;showQuestion()}
+$('#playAgain').onclick=()=>{updateStats();show('home')}
 
-  /* ---------- utils ---------- */
-  function loadProfiles(){try{return JSON.parse(localStorage.getItem(LS_PROFILES)||'[]')}catch{return[]}}
-  function saveProfiles(a){localStorage.setItem(LS_PROFILES,JSON.stringify(a))}
-  function refreshLoginSelect(){const sel=$('#loginSelect');sel.innerHTML='';loadProfiles().forEach((p,i)=>{const o=document.createElement('option');o.value=i;o.textContent=p.name;sel.appendChild(o)})}
-  const fileToDataURL=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)})
-  async function sha256(s){const b=new TextEncoder().encode(s);const h=await crypto.subtle.digest('SHA-256',b);return[...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,'0')).join('')}
-  function show(id){['login','home','quiz','result','board'].forEach(x=>$('#'+x).style.display=x===id?'block':'none')}
-  function setStats(r){$('#statScore').textContent=r?`${r.score}/${r.total}`:'–';$('#statIQ').textContent=r?`${r.iq}`:'–';$('#statGames').textContent=localStorage.getItem('fermah_games')||'–'}
+/* quiz */
+const BANK=[{q:"What is Fermah?",a:["Universal proof market","DEX","Bridge","Wallet"],i:0}, /* ... add more ... */];
+function pickRandom(n,arr=BANK){return[...arr].sort(()=>Math.random()-0.5).slice(0,n)}
+function startQuiz(){questions=pickRandom(quizSize).map(q=>{const opts=[...q.a].map((t,i)=>({t,i}));opts.sort(()=>Math.random()-0.5);return{q:q.q,opts,correct:opts.findIndex(o=>o.i===q.i)}});idx=0;score=0;startTs=Date.now();if(timerId)clearInterval(timerId);timerId=setInterval(()=>$('#hudTime').textContent=Math.floor((Date.now()-startTs)/1000)+'s',250);$('#hudUser').textContent=`👤 ${currentUser.name}`;$('#hudScore').textContent=0;$('#hudTotal').textContent=quizSize;show('quiz');showQuestion()}
+function showQuestion(){if(idx>=questions.length){endQuiz();return}const it=questions[idx];$('#hudIdx').textContent=idx+1;$('#question').textContent=it.q;const box=$('#options');box.innerHTML='';it.opts.forEach((o,i)=>{const b=document.createElement('button');b.className='option';b.textContent=o.t;b.onclick=()=>selectAnswer(i,b);box.appendChild(b)})}
+function selectAnswer(i,btn){const it=questions[idx],all=[...$$('.option')];all.forEach(x=>x.disabled=true);if(i===it.correct){score++;btn.classList.add('correct')}else{btn.classList.add('wrong');all[it.correct].classList.add('correct')}$('#hudScore').textContent=score;setTimeout(()=>{idx++;showQuestion()},600)}
+function endQuiz(){clearInterval(timerId);const total=questions.length,secs=Math.floor((Date.now()-startTs)/1000)||1,acc=score/total,iq=Math.round(60+40*acc+Math.min(20,200/secs));$('#resName').textContent=currentUser.name;$('#resPfp').src=currentUser.pfp||'';$('#resTag').textContent=`${score}/${total} correct • ${secs}s`;$('#resIQ').textContent=iq;$('#resSummary').textContent=`Accuracy ${(acc*100).toFixed(0)}%`;saveResult({score,total,secs,iq});buildCard({name:currentUser.name,pfp:currentUser.pfp,score,total,secs,iq});show('result')}
 
-  /* ---------- Create / Login / Logout ---------- */
-  $('#toggleCreate').onclick=()=>{const f=$('#passCreate');f.type=f.type==='password'?'text':'password'}
-  $('#toggleLogin').onclick=()=>{const f=$('#passLogin');f.type=f.type==='password'?'text':'password'}
-  $('#pfp').addEventListener('change',e=>{$('#fileName').textContent=e.target.files[0]?e.target.files[0].name:'No image'})
+/* stats */
+function saveResult(r){localStorage.setItem('fermah_last_result',JSON.stringify(r));const games=(+localStorage.getItem('fermah_games')||0)+1;localStorage.setItem('fermah_games',games);const best=Math.max(r.iq,(+localStorage.getItem('fermah_best')||0));localStorage.setItem('fermah_best',best)}
+function updateStats(){const r=JSON.parse(localStorage.getItem('fermah_last_result')||'null');$('#statScore').textContent=r?`${r.score}/${r.total}`:'–';$('#statIQ').textContent=localStorage.getItem('fermah_best')||'–';$('#statGames').textContent=localStorage.getItem('fermah_games')||'–'}
 
-  $('#createBtn').onclick=async()=>{
-    const name=$('#name').value.trim(); if(!name) return alert('Enter a username')
-    const pass=$('#passCreate').value; if(!pass||pass.length<6) return alert('Password must be at least 6 characters')
-    const passHash=await sha256(pass); const pfpFile=$('#pfp').files[0]; const pfp=pfpFile?await fileToDataURL(pfpFile):''
-    const list=loadProfiles(); if(list.some(p=>p.name.toLowerCase()===name.toLowerCase())) return alert('Name already exists. Use Login.')
-    list.push({name,pfp,passHash}); saveProfiles(list); localStorage.setItem(LS_LAST,name); refreshLoginSelect(); success()
-    modal({title:'🎉 Account Created',msg:`Congrats <b>${name}</b> — you can log in now.`,buttons:[{label:'OK',onClick:()=>{}}]})
-  }
-
-  $('#loginBtn').onclick=async()=>{
-    const list=loadProfiles(); const i=$('#loginSelect').value|0; const user=list[i]; if(!user) return alert('Select a profile')
-    const input=$('#passLogin').value; const hash=await sha256(input); if(hash!==user.passHash) return alert('Wrong password')
-    currentUser={name:user.name,pfp:user.pfp||''}; localStorage.setItem(LS_LAST,user.name); $('#logoutBtn').style.display='inline-block';
-    // land on HOME (profile hub)
-    $('#homeName').textContent=currentUser.name; $('#homePfp').src=currentUser.pfp||''; setStats(lastResult()); show('home');
-  }
-
-  $('#logoutBtn').onclick=()=>{currentUser=null; $('#logoutBtn').style.display='none'; show('login')}
-
-  /* ---------- Simple bank (20 random per run) ---------- */
-  const BANK=[
-    {q:"What is Fermah?", a:["Universal proof market","DEX","Bridge","Wallet"], i:0},
-    {q:"‘Prover Nodes’ in Fermah primarily do what?", a:["Generate ZK proofs","Run validators","Store files","Provide RPC"], i:0},
-    {q:"What backs reliability of Prover Nodes?", a:["Restaked value","Captchas","PoW hash rate","Nothing"], i:0},
-    {q:"Fermah aligns demand and supply via the ____.", a:["Matchmaker","Sequencer","Relay","Oracle"], i:0},
-    {q:"Which is a supported system?", a:["Groth16","PoS","TLS","ECDSA"], i:0},
-    {q:"Fermah aims to be credibly neutral across…", a:["All proof systems","Only zkEVMs","Only STARKs","Only Groth16"], i:0},
-    {q:"What is a zkVM?", a:["A VM that can be proven","A video machine","A validator VM","A vault manager"], i:0},
-    {q:"Why are ZK proofs costly without a market?", a:["Low utilization & infra costs","Gas fees only","Audits","Licenses"], i:0},
-    {q:"What does the Verifier do?", a:["Checks proofs","Creates proofs","Generates keys","Runs RPC"], i:0},
-    {q:"Setup parameters are usually produced via a…", a:["Ceremony","Bridge","Governance vote","Auction"], i:0},
-    {q:"Fermah’s testnet invited which side first?", a:["External Prover Nodes","Seeker wallets","NFT artists","Indexers"], i:0},
-    {q:"Proof requests from Seekers are assigned to…", a:["Capable Prover Nodes","Sequencers","MEV relays","Indexers"], i:0},
-    {q:"Intelligent orchestration mainly improves…", a:["Utilization & latency","TPS","APY","Bridges"], i:0},
-    {q:"‘Universal proving’ means Fermah can handle…", a:["Any proof sys/chain/VM","Only L2s","Only Ethereum","Only SNARKs"], i:0},
-    {q:"Which is a Fermah priority?", a:["Cheap, fast, reliable proofs","Highest fees","Centralization","Closed source"], i:0},
-    {q:"A ‘Seeker’ is…", a:["A whitelisted user submitting requests","A validator","A faucet","A price oracle"], i:0},
-    {q:"Prover/Verifier artifacts are shipped as…", a:["Docker images","IPFS NFTs","ZIP emails","Browser plugins"], i:0},
-    {q:"Restaking + AVS context refers to…", a:["EigenLayer","Bitcoin mining","Cosmos ICS","Arbitrum Nitro"], i:0},
-    {q:"What does vendor lock-in risk?", a:["Portability & negotiation power","Gas refunds","Wallet UX","Bridging"], i:0},
-    {q:"Transparency in proof pricing helps…", a:["Forecast costs","SPAM","Sequencers stall","Nothing"], i:0},
-  ];
-  const pickRandom = (n, arr=BANK)=>[...arr].sort(()=>Math.random()-0.5).slice(0,n);
-
-  /* ---------- HOME actions ---------- */
-  $('#startQuizBtn').onclick=()=>askStart();
-  $('#goBoardBtn').onclick=()=>{show('board'); loadBoard('all')}
-
-  function askStart(){
-    modal({
-      title:'🧠 Ready to Test Your IQ?',
-      msg:'We’ll give you 20 questions. Answer fast for a time bonus!',
-      buttons:[
-        {label:'NO 😞', alt:true, onClick:()=>{ sad(); }},
-        {label:'YES, let’s go!', onClick:()=>{ success(); startQuiz(); }}
-      ]
-    });
-  }
-
-  /* ---------- Quiz engine ---------- */
-  function startQuiz(){
-    $('#hudUser').textContent=`👤 ${currentUser.name}`; $('#hudScore').textContent=0; $('#hudTotal').textContent=quizSize; $('#hudTime').textContent='0s';
-    questions = pickRandom(quizSize).map(q=>{ const opts=[...q.a].map((t,i)=>({t,i})); opts.sort(()=>Math.random()-0.5); return {q:q.q, opts, correct:opts.findIndex(o=>o.i===q.i)} })
-    idx=0; score=0; startTs=Date.now(); if(timerId) clearInterval(timerId);
-    timerId=setInterval(()=>$('#hudTime').textContent=Math.floor((Date.now()-startTs)/1000)+'s',250);
-    show('quiz'); showQuestion();
-  }
-  function showQuestion(){
-    if(idx>=questions.length){ endQuiz(); return; }
-    $('#hudIdx').textContent=idx+1; const it=questions[idx]; $('#question').textContent=it.q;
-    const box=$('#options'); box.innerHTML=''; it.opts.forEach((o,i)=>{ const b=document.createElement('button'); b.className='option'; b.textContent=o.t; b.onclick=()=>selectAnswer(i,b); box.appendChild(b); });
-  }
-  function selectAnswer(i,btn){
-    const it=questions[idx], all=[...$$('.option')]; all.forEach(x=>x.disabled=true);
-    if(i===it.correct){ score++; btn.classList.add('correct'); } else { btn.classList.add('wrong'); all[it.correct].classList.add('correct'); }
-    $('#hudScore').textContent=score; setTimeout(()=>{ idx++; showQuestion(); },600);
-  }
-  $('#skipBtn').onclick=()=>{ idx++; showQuestion(); };
-
-  function endQuiz(){
-    clearInterval(timerId);
-    const total=questions.length, secs=Math.floor((Date.now()-startTs)/1000)||1, acc=score/total;
-    const iq=Math.round(60+40*acc+Math.min(20,200/secs));
-    show('result');
-    $('#resName').textContent=currentUser.name; $('#resPfp').src=currentUser.pfp||''; $('#resTag').textContent=`${score}/${total} correct • ${secs}s`;
-    $('#resIQ').textContent=iq; $('#resSummary').textContent=`Accuracy ${(acc*100).toFixed(0)}% • Time bonus applied.`;
-
-    // save local stats
-    const games=(+localStorage.getItem('fermah_games')||0)+1; localStorage.setItem('fermah_games',games);
-    localStorage.setItem('fermah_last_result',JSON.stringify({score,total,secs,iq}));
-
-    // save global
-    saveToBoard({name:currentUser.name, pfp:currentUser.pfp, score,total,secs,iq,ts:Date.now()});
-
-    // build share card
-    buildShareCard({name:currentUser.name, pfp:currentUser.pfp, score,total,secs,iq});
-  }
-
-  function lastResult(){ try{return JSON.parse(localStorage.getItem('fermah_last_result'))}catch{return null} }
-
-  /* ---------- Firestore leaderboard ---------- */
-  async function saveToBoard(e){
-    try{
-      await addDoc(collection(db,'leaderboard'),{
-        name:e.name, pfp:e.pfp||'', score:e.score, total:e.total, secs:e.secs, iq:e.iq,
-        ts:e.ts, day:new Date(e.ts).toISOString().slice(0,10)
-      });
-    }catch(err){ console.error(err); }
-  }
-
-  async function loadBoard(mode='all'){
-    const tbody=$('#boardTable tbody'); tbody.innerHTML='<tr><td colspan="6">Loading…</td></tr>';
-    try{
-      const coll = collection(db,'leaderboard');
-      const qAll = mode==='today'
-        ? query(coll, where('day','==',new Date().toISOString().slice(0,10)), orderBy('iq','desc'), orderBy('secs','asc'), limit(100))
-        : query(coll, orderBy('iq','desc'), orderBy('secs','asc'), limit(100));
-      const snap = await getDocs(qAll);
-      const rows = []; snap.forEach(d=>rows.push(d.data()));
-      tbody.innerHTML='';
-      rows.forEach((r,i)=>{
-        const tr=document.createElement('tr'); tr.innerHTML=`
-          <td>${i+1}</td>
-          <td><span style="display:inline-flex;align-items:center;gap:8px">
-            ${r.pfp?`<img src="${r.pfp}" class="pfp" style="width:28px;height:28px;border-radius:6px">`:''}${r.name}</span></td>
-          <td>${r.score}/${r.total}</td><td>${r.secs}s</td><td>${r.iq}</td>
-          <td>${new Date(r.ts).toLocaleDateString()}</td>`; tbody.appendChild(tr);
-      });
-    }catch(e){ tbody.innerHTML='<tr><td colspan="6">Error loading board.</td></tr>'; console.error(e); }
-  }
-  $('#tabAll').onclick=()=>loadBoard('all');
-  $('#tabToday').onclick=()=>loadBoard('today');
-
-  // BACK -> go to MAIN (not logout)
-  $('#backHome').onclick=()=>{ show('home'); };
-
-  $('#viewBoard').onclick=()=>{ show('board'); loadBoard('all'); };
-  $('#playAgain').onclick=()=>{ show('home'); };
-
-  /* ---------- Share card ---------- */
-  function buildShareCard({name,pfp,score,total,secs,iq}){
-    const W=1000,H=520, pad=36;
-    const c=document.createElement('canvas'); c.width=W; c.height=H; const g=c.getContext('2d');
-
-    // bg
-    const grad=g.createLinearGradient(0,0,0,H); grad.addColorStop(0,'#0f2730'); grad.addColorStop(1,'#0d2026'); g.fillStyle=grad; g.fillRect(0,0,W,H);
-
-    // frame
-    g.strokeStyle='#13414b'; g.lineWidth=4; g.strokeRect(10,10,W-20,H-20);
-
-    // logo
-    g.fillStyle='#17c8a5';
-    g.fillRect(W-140,24,96,18); // top bar
-    g.fillRect(W-120,42,18,92); // left leg
-    g.fillRect(W-64,42,18,92);  // right leg
-    g.fillRect(W-120,134,18,14); g.fillRect(W-64,134,18,14);
-
-    // text
-    g.fillStyle='#e8f6f2'; g.font='700 38px Inter,Segoe UI,Arial'; g.fillText('Fermah Quiz — Proof IQ', pad, 78);
-    g.font='400 20px Inter,Segoe UI,Arial'; g.fillStyle='#9fc6bb'; g.fillText(new Date().toLocaleString(), pad, 110);
-
-    // stats
-    g.fillStyle='#e8f6f2'; g.font='800 64px Inter,Segoe UI,Arial'; g.fillText(`${iq}`, pad, 188);
-    g.font='700 22px Inter,Segoe UI,Arial'; g.fillStyle='#9fc6bb'; g.fillText('IQ', pad+100, 180);
-    g.fillStyle='#bfeee4'; g.font='400 22px Inter,Segoe UI,Arial'; g.fillText(`Score ${score}/${total}`, pad, 230);
-    g.fillText(`Time ${secs}s`, pad, 262);
-
-    // name
-    g.fillStyle='#e8f6f2'; g.font='700 28px Inter,Segoe UI,Arial'; g.fillText(name, pad, 320);
-
-    // pfp
-    if(pfp){
-      const img=new Image(); img.crossOrigin='anonymous'; img.onload=()=>{
-        roundImage(g,img,W-260,180,180,24); finish();
-      }; img.src=pfp;
-    }else{ finish(); }
-
-    function roundImage(ctx,img,x,y,size,r){ctx.save(); roundedRect(ctx,x,y,size,size,r); ctx.clip(); ctx.drawImage(img,x,y,size,size); ctx.restore(); ctx.strokeStyle='#153c46'; ctx.lineWidth=3; ctx.stroke() }
-    function roundedRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
-    function finish(){
-      const data=c.toDataURL('image/png');
-      const prev=$('#cardPreview'); prev.src=data; prev.style.display='block';
-      const a=$('#dlCard'); a.href=data; $('#shareRow').style.display='flex';
-      // Share buttons
-      $('#shareCard').onclick=async()=>{
-        try{
-          const resp=await fetch(data); const blob=await resp.blob();
-          const file=new File([blob],'fermah-quiz-card.png',{type:'image/png'});
-          if(navigator.canShare && navigator.canShare({files:[file]})){
-            await navigator.share({files:[file], text:`My Fermah Proof-IQ: ${iq} (${score}/${total}, ${secs}s)`});
-          }else{ a.click(); }
-        }catch(e){ a.click(); }
-      };
-      const text=encodeURIComponent(`My Fermah Proof-IQ: ${iq} (${score}/${total}, ${secs}s)`);
-      const url=encodeURIComponent(window.location.href);
-      $('#shareX').href=`https://twitter.com/intent/tweet?text=${text}&url=${url}`;
-    }
-  }
-
-  /* ---------- auto ---------- */
-  window.addEventListener('DOMContentLoaded', ()=>{
-    refreshLoginSelect();
-    const last=localStorage.getItem(LS_LAST);
-    if(last){ // show login ready
-      $('#loginSelect').value=[...$('#loginSelect').options].findIndex(o=>o.textContent===last);
-    }
-  });
+/* card */
+function buildCard({name,pfp,score,total,secs,iq}){const c=document.createElement('canvas');c.width=800;c.height=420;const g=c.getContext('2d');g.fillStyle='#0f2730';g.fillRect(0,0,800,420);g.fillStyle='#17c8a5';g.font='700 40px Arial';g.fillText('Fermah Proof-IQ',40,60);g.fillStyle='#e8f6f2';g.font='700 80px Arial';g.fillText(iq,40,160);g.font='20px Arial';g.fillText(`${score}/${total} correct in ${secs}s`,40,200);g.fillText(name,40,240);const data=c.toDataURL();$('#cardPreview').src=data;$('#cardPreview').style.display='block';$('#shareRow').style.display='flex';$('#dlCard').href=data;$('#shareX').href=`https://twitter.com/intent/tweet?text=My%20Fermah%20Proof-IQ%20is%20${iq}&url=${encodeURIComponent(location.href)}`}
 </script>
 </body>
 </html>
