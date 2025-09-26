@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fermah Quiz</title>
+<style>
+  :root{--bg:#0b1b22;--panel:#0e252e;--ink:#e8f6f2;--muted:#9fc6bb;--accent:#17c8a5;--good:#1fd38f;--bad:#ff6b6b}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+  .wrap{max-width:980px;margin:auto;padding:16px 14px 80px}
+  header{display:flex;align-items:center;gap:12px;margin:8px 0 18px}
+  .title{font-weight:800;font-size:28px}
+  .tag{color:var(--muted);font-size:13px}
+  .spacer{flex:1}
+  .logo{width:44px;height:44px;border-radius:10px;background:#062027;display:grid;place-items:center;box-shadow:0 0 0 1px #07313a inset}
+  .logo svg{width:28px;height:28px}
+  .logout{margin-left:8px;display:none}
+  .card{background:linear-gradient(180deg,#0e262f,#0e2127);border:1px solid #13333d;border-radius:14px;padding:16px 16px 14px;box-shadow:0 10px 24px rgba(0,0,0,.25)}
+  .grid{display:grid;gap:12px}
+  .two{grid-template-columns:1fr 1fr}
+  .btn{background:var(--accent);border:none;color:#062027;font-weight:800;padding:12px 14px;border-radius:12px;cursor:pointer}
+  .btn:active{transform:translateY(1px)}
+  .btn.alt{background:#153943;color:#cdeee7;border:1px solid #24535f}
+  .field{display:grid;gap:6px}
+  input[type="text"],input[type="file"],input[type="password"],select{
+    background:#0a1d24;border:1px solid #173842;color:var(--ink);
+    padding:11px 12px;border-radius:10px;outline:none
+  }
+  .muted{color:var(--muted);font-size:13px}
+  .center{display:grid;place-items:center;text-align:center}
+  .pfp{width:84px;height:84px;border-radius:16px;object-fit:cover;border:1px solid #23444f;background:#0b1e25}
+  .row{display:flex;gap:8px;align-items:center}
+  .tiny{font-size:12px;color:var(--muted);cursor:pointer}
+  .qtxt{font-size:20px;font-weight:700;margin:0 0 10px}
+  .options{display:grid;gap:10px}
+  .option{background:#0a1e25;border:1px solid #183a45;border-radius:12px;padding:12px;cursor:pointer}
+  .option:hover{border-color:#2a5d6b}
+  .option.correct{border-color:var(--good);box-shadow:0 0 0 2px rgba(31,211,143,.15)}
+  .option.wrong{border-color:var(--bad);box-shadow:0 0 0 2px rgba(255,107,107,.12)}
+  .hud{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 14px}
+  .chip{background:#0a1d23;border:1px solid #173741;color:#bfeee4;padding:6px 10px;border-radius:999px;font-size:13px}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px;border-bottom:1px solid #15353f;text-align:left;font-size:14px}
+  footer{position:fixed;left:0;right:0;bottom:0;padding:10px 14px;text-align:center;color:#96cfc3;background:linear-gradient(180deg,transparent,rgba(0,0,0,.35))}
+  footer b{color:#d8fff7}
+
+  /* Modal */
+  .modalWrap{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);z-index:50}
+  .modal{width:min(520px,92vw);background:linear-gradient(180deg,#0f2730,#0e2127);border:1px solid #18404a;border-radius:16px;padding:18px;box-shadow:0 14px 40px rgba(0,0,0,.4)}
+  .modal h3{margin:0 0 8px;font-size:22px}
+  .modal p{margin:0 0 14px;color:#bfeee4}
+  .modal .row{justify-content:flex-end}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="title">Fermah Quiz</div>
+      <div class="tag">Learn ZK + prove your knowledge.</div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn alt logout" id="logoutBtn">Logout</button>
+    <div class="logo" title="Fermah">
+      <svg viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path fill="#17C8A5" d="M6 8c0-3.3 2.7-6 6-6h76c3.3 0 6 2.7 6 6v8c0 3.3-2.7 6-6 6H62v44h8c3.3 0 6 2.7 6 6v6H56V22H44v56H24v-6c0-3.3 2.7-6 6-6h8V22H12c-3.3 0-6-2.7-6-6V8z"/>
+        <rect x="20" y="68" width="14" height="10" rx="2" fill="#17C8A5"/>
+        <rect x="66" y="68" width="14" height="10" rx="2" fill="#17C8A5"/>
+      </svg>
+    </div>
+  </header>
+
+  <!-- LOGIN / CREATE -->
+  <section id="login" class="card grid">
+    <div class="grid two">
+      <div class="field">
+        <label class="muted">Create account</label>
+        <input id="name" type="text" placeholder="Username (e.g. FreeGuyx247)" />
+        <input id="pfp" type="file" accept="image/png,image/jpeg" />
+        <div class="row">
+          <input id="passCreate" type="password" placeholder="Password (min 6 chars)" style="flex:1">
+          <span class="tiny" id="toggleCreate">Show</span>
+        </div>
+        <button class="btn" id="createBtn">Create & Continue</button>
+      </div>
+      <div class="field">
+        <label class="muted">Or log in</label>
+        <select id="loginSelect"></select>
+        <div class="row">
+          <input id="passLogin" type="password" placeholder="Password" style="flex:1">
+          <span class="tiny" id="toggleLogin">Show</span>
+        </div>
+        <button class="btn alt" id="loginBtn">Login</button>
+      </div>
+    </div>
+    <div class="muted">Profiles are stored locally on this device (passwords are hashed with SHA-256).</div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" class="card" style="display:none">
+    <div class="hud">
+      <span class="chip" id="hudUser">👤</span>
+      <span class="chip">Q <b id="hudIdx">1</b>/<b id="hudTotal">20</b></span>
+      <span class="chip">✅ <b id="hudScore">0</b></span>
+      <span class="chip">⏱️ <b id="hudTime">0s</b></span>
+    </div>
+    <p class="qtxt" id="question"></p>
+    <div class="options" id="options"></div>
+    <div class="grid" style="margin-top:12px">
+      <button class="btn alt" id="skipBtn">Skip</button>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result" class="card" style="display:none">
+    <div class="grid two" style="align-items:center">
+      <div class="center">
+        <img id="resPfp" class="pfp" alt="">
+        <div style="font-weight:800;margin-top:8px" id="resName"></div>
+        <div class="muted" id="resTag"></div>
+      </div>
+      <div>
+        <div class="qtxt" style="margin:0 0 6px">Your Proof-IQ</div>
+        <div id="resIQ" style="font-size:40px;font-weight:900;color:var(--accent)"></div>
+        <div class="muted" id="resSummary"></div>
+      </div>
+    </div>
+    <div class="grid two" style="margin-top:12px">
+      <button class="btn" id="playAgain">Play Again</button>
+      <button class="btn alt" id="viewBoard">View Leaderboard</button>
+    </div>
+  </section>
+
+  <!-- LEADERBOARD -->
+  <section id="board" class="card" style="display:none">
+    <div class="qtxt">Leaderboard</div>
+    <table id="boardTable">
+      <thead><tr><th>#</th><th>Player</th><th>Score</th><th>Time</th><th>IQ</th><th>Date</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="grid" style="margin-top:12px">
+      <button class="btn alt" id="backHome">Back</button>
+    </div>
+  </section>
+</div>
+
+<!-- Modal -->
+<div id="modalWrap" class="modalWrap">
+  <div class="modal">
+    <h3 id="mTitle"></h3>
+    <p id="mMsg"></p>
+    <div class="row" id="mBtns"></div>
+  </div>
+</div>
+
+<footer>
+  Made by <b>FreeGuyx247</b> • Community fan project (not official).
+</footer>
+
+<script>
+/* ---------- Local storage keys ---------- */
+const LS_PROFILES='fermah_profiles_v2';
+const LS_LAST='fermah_last_user';
+const LS_BOARD='fermah_leaderboard';
+
+const $ = s=>document.querySelector(s), $$ = s=>document.querySelectorAll(s);
+
+let currentUser=null, quizSize=20, timerId=null, questions=[], idx=0, score=0, startTs=0;
+
+/* ---------- Simple sounds (WebAudio) ---------- */
+let actx=null;
+function ctx(){ return actx||(actx=new (window.AudioContext||window.webkitAudioContext)()); }
+function beep(freq=880, dur=0.18, type='sine', vol=0.2){
+  const a=ctx(); const o=a.createOscillator(); const g=a.createGain();
+  o.type=type; o.frequency.value=freq; g.gain.value=vol; o.connect(g); g.connect(a.destination); o.start();
+  g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime+dur); o.stop(a.currentTime+dur+0.02);
+}
+function successSound(){ beep(880,0.12,'triangle',0.25); setTimeout(()=>beep(1320,0.14,'triangle',0.22),120); }
+function sadSound(){ beep(420,0.16,'sawtooth',0.18); setTimeout(()=>beep(300,0.22,'sawtooth',0.16),160); }
+
+/* ---------- Modal helpers ---------- */
+function modal({title,msg,buttons}) {
+  $('#mTitle').textContent=title; $('#mMsg').innerHTML=msg;
+  const c=$('#mBtns'); c.innerHTML='';
+  (buttons||[{label:'OK'}]).forEach(b=>{
+    const el=document.createElement('button');
+    el.className='btn '+(b.alt?'alt':''); el.textContent=b.label;
+    el.onclick=()=>{ $('#modalWrap').style.display='none'; b.onClick&&b.onClick(); };
+    c.appendChild(el);
+  });
+  $('#modalWrap').style.display='grid';
+}
+
+/* ---------- Utils ---------- */
+function loadProfiles(){ try{return JSON.parse(localStorage.getItem(LS_PROFILES)||'[]')}catch{return[]} }
+function saveProfiles(arr){ localStorage.setItem(LS_PROFILES, JSON.stringify(arr)) }
+function refreshLoginSelect(){
+  const sel=$('#loginSelect'); sel.innerHTML='';
+  loadProfiles().forEach((p,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=p.name+(p.passHash?'':' (no pw)'); sel.appendChild(o); })
+}
+async function fileToDataURL(f){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); }) }
+async function sha256(text){
+  const buf = new TextEncoder().encode(text);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+/* ---------- Create / Login / Logout ---------- */
+$('#toggleCreate').onclick=()=>{ const f=$('#passCreate'); f.type=f.type==='password'?'text':'password'; };
+$('#toggleLogin').onclick=()=>{ const f=$('#passLogin'); f.type=f.type==='password'?'text':'password'; };
+
+$('#createBtn').onclick=async ()=>{
+  const name = $('#name').value.trim();
+  if(!name) return alert('Enter a username');
+  const pass = $('#passCreate').value;
+  if(!pass || pass.length<6) return alert('Password must be at least 6 characters');
+  const passHash = await sha256(pass);
+  const pfpFile = $('#pfp').files[0];
+  const pfp = pfpFile ? await fileToDataURL(pfpFile) : '';
+  const list = loadProfiles();
+  if(list.some(p=>p.name.toLowerCase()===name.toLowerCase())) return alert('Name already exists. Use Login.');
+  list.push({name, pfp, passHash});
+  saveProfiles(list); localStorage.setItem(LS_LAST, name);
+  refreshLoginSelect();
+  successSound();
+  modal({
+    title:'🎉 Account Created',
+    msg:`Congratulations — your account <b>${name}</b> is ready.<br/>Please go back and <b>log in</b>.`,
+    buttons:[{label:'Okay, got it', onClick:()=>{}}]
+  });
+};
+
+$('#loginBtn').onclick=async ()=>{
+  const list=loadProfiles();
+  const idxSel=$('#loginSelect').value|0;
+  const user=list[idxSel];
+  if(!user) return alert('Select a profile');
+  const input=$('#passLogin').value;
+  if(!user.passHash){
+    if(input!=='') return alert('This profile has no password. Leave it blank to login and then set one.');
+    currentUser={name:user.name, pfp:user.pfp||''};
+    askStart();
+  } else {
+    const hash = await sha256(input);
+    if(hash!==user.passHash) return alert('Wrong password');
+    currentUser={name:user.name, pfp:user.pfp||''};
+    localStorage.setItem(LS_LAST, user.name);
+    askStart();
+  }
+};
+
+function askStart(){
+  $('#logoutBtn').style.display='inline-block';
+  modal({
+    title:'🧠 Ready to Test Your IQ?',
+    msg:'We’ll give you 20 questions. Answer fast for a time bonus!',
+    buttons:[
+      {label:'NO 😞', alt:true, onClick:()=>{ sadSound(); }},
+      {label:'YES, let’s go!', onClick:()=>{ successSound(); startQuiz(); }}
+    ]
+  });
+}
+
+$('#logoutBtn').onclick=()=>{
+  currentUser=null;
+  $('#quiz').style.display='none'; $('#result').style.display='none'; $('#board').style.display='none';
+  $('#login').style.display='block'; $('#logoutBtn').style.display='none';
+};
+
+/* ---------- Question bank (sample) ---------- */
+const BANK=[
+ {q:"What is Fermah?", a:["Universal proof market","DEX","Bridge","Wallet"], i:0},
+ {q:"‘Prover Nodes’ in Fermah primarily do what?", a:["Generate ZK proofs","Run validators","Store files","Provide RPC"], i:0},
+ {q:"What backs reliability of Prover Nodes?", a:["Restaked value","Captchas","PoW hash rate","Nothing"], i:0},
+ {q:"Fermah aligns demand and supply via the ____.", a:["Matchmaker","Sequencer","Relay","Oracle"], i:0},
+ {q:"Which is a supported system?", a:["Groth16","PoS","TLS","ECDSA"], i:0},
+ {q:"Fermah aims to be credibly neutral across…", a:["All proof systems","Only zkEVMs","Only STARKs","Only Groth16"], i:0},
+ {q:"What is a zkVM?", a:["A VM that can be proven","A video machine","A validator VM","A vault manager"], i:0},
+ {q:"Why are ZK proofs costly without a market?", a:["Low utilization & infra costs","Gas fees only","Audits","Licenses"], i:0},
+ {q:"What does the Verifier do?", a:["Checks proofs","Creates proofs","Generates keys","Runs RPC"], i:0},
+ {q:"Setup parameters are usually produced via a…", a:["Ceremony","Bridge","Governance vote","Auction"], i:0},
+ {q:"Fermah’s testnet invited which side first?", a:["External Prover Nodes","Seeker wallets","NFT artists","Indexers"], i:0},
+ {q:"Proof requests from Seekers are assigned to…", a:["Capable Prover Nodes","Sequencers","MEV relays","Indexers"], i:0},
+ {q:"Intelligent orchestration mainly improves…", a:["Utilization & latency","TPS","APY","Bridges"], i:0},
+ {q:"‘Universal proving’ means Fermah can handle…", a:["Any proof sys/chain/VM","Only L2s","Only Ethereum","Only SNARKs"], i:0},
+ {q:"Which is a Fermah priority?", a:["Cheap, fast, reliable proofs","Highest fees","Centralization","Closed source"], i:0},
+ {q:"A ‘Seeker’ is…", a:["A whitelisted user submitting requests","A validator","A faucet","A price oracle"], i:0},
+ {q:"Prover/Verifier artifacts are shipped as…", a:["Docker images","IPFS NFTs","ZIP emails","Browser plugins"], i:0},
+ {q:"Restaking + AVS context refers to…", a:["EigenLayer","Bitcoin mining","Cosmos ICS","Arbitrum Nitro"], i:0},
+ {q:"What does vendor lock-in risk?", a:["Portability & negotiation power","Gas refunds","Wallet UX","Bridging"], i:0},
+ {q:"Transparency in proof pricing helps…", a:["Forecast costs","SPAM","Sequencers stall","Nothing"], i:0},
+];
+
+function pickRandom(n, arr=BANK){ const a=[...arr]; a.sort(()=>Math.random()-0.5); return a.slice(0,n); }
+
+/* ---------- Quiz engine ---------- */
+function startQuiz(){
+  $('#login').style.display='none'; $('#result').style.display='none'; $('#board').style.display='none'; $('#quiz').style.display='block';
+  $('#hudUser').textContent=`👤 ${currentUser.name}`; $('#hudScore').textContent=0; $('#hudTotal').textContent=quizSize; $('#hudTime').textContent='0s';
+
+  questions = pickRandom(quizSize).map(q=>{
+    const opts=[...q.a].map((t,i)=>({t,i})); opts.sort(()=>Math.random()-0.5);
+    return {q:q.q, opts, correct:opts.findIndex(o=>o.i===q.i)};
+  });
+  idx=0; score=0; startTs=Date.now();
+  if(timerId) clearInterval(timerId);
+  timerId=setInterval(()=>$('#hudTime').textContent=Math.floor((Date.now()-startTs)/1000)+'s',250);
+  showQuestion();
+  $('#logoutBtn').style.display='inline-block';
+}
+function showQuestion(){
+  if(idx>=questions.length){ endQuiz(); return; }
+  $('#hudIdx').textContent=idx+1;
+  const it=questions[idx]; $('#question').textContent=it.q;
+  const box=$('#options'); box.innerHTML='';
+  it.opts.forEach((o,i)=>{ const b=document.createElement('button'); b.className='option'; b.textContent=o.t; b.onclick=()=>selectAnswer(i,b); box.appendChild(b); });
+}
+function selectAnswer(i,btn){
+  const it=questions[idx], all=[...$$('.option')]; all.forEach(x=>x.disabled=true);
+  if(i===it.correct){ score++; btn.classList.add('correct'); } else { btn.classList.add('wrong'); all[it.correct].classList.add('correct'); }
+  $('#hudScore').textContent=score; setTimeout(()=>{ idx++; showQuestion(); },600);
+}
+$('#skipBtn').onclick=()=>{ idx++; showQuestion(); };
+
+function endQuiz(){
+  clearInterval(timerId);
+  const total=questions.length, secs=Math.floor((Date.now()-startTs)/1000)||1, acc=score/total;
+  const iq=Math.round(60+40*acc+Math.min(20,200/secs));
+  $('#quiz').style.display='none'; $('#result').style.display='block';
+  $('#resName').textContent=currentUser.name; $('#resPfp').src=currentUser.pfp||''; $('#resTag').textContent=`${score}/${total} correct • ${secs}s`;
+  $('#resIQ').textContent=iq; $('#resSummary').textContent=`Accuracy ${(acc*100).toFixed(0)}% • Time bonus applied.`;
+  saveToBoard({name:currentUser.name, pfp:currentUser.pfp, score,total,secs,iq,ts:Date.now()});
+}
+
+/* ---------- Leaderboard (local) ---------- */
+function loadBoard(){ try{return JSON.parse(localStorage.getItem(LS_BOARD)||'[]')}catch{return[]} }
+function saveBoard(l){ localStorage.setItem(LS_BOARD, JSON.stringify(l)) }
+function saveToBoard(e){ const l=loadBoard(); l.push(e); l.sort((a,b)=>b.iq-a.iq||a.secs-b.secs); saveBoard(l.slice(0,100)); }
+function renderBoard(){
+  const tb=$('#boardTable tbody'); tb.innerHTML='';
+  loadBoard().forEach((r,i)=>{
+    const tr=document.createElement('tr'); tr.innerHTML=`
+      <td>${i+1}</td>
+      <td><span style="display:inline-flex;align-items:center;gap:8px">
+        ${r.pfp?`<img src="${r.pfp}" class="pfp" style="width:28px;height:28px;border-radius:6px">`:''}${r.name}</span></td>
+      <td>${r.score}/${r.total}</td><td>${r.secs}s</td><td>${r.iq}</td>
+      <td>${new Date(r.ts).toLocaleDateString()}</td>`; tb.appendChild(tr);
+  });
+}
+$('#viewBoard').onclick=()=>{ $('#result').style.display='none'; $('#board').style.display='block'; renderBoard(); };
+$('#backHome').onclick=()=>{ $('#board').style.display='none'; $('#login').style.display='block'; $('#logoutBtn').style.display='none'; };
+
+/* Auto-prefill login list */
+window.addEventListener('DOMContentLoaded', refreshLoginSelect);
+</script>
+</body>
+</html>
