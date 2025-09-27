@@ -6,19 +6,29 @@
 <title>Fermah Quiz</title>
 <style>
   :root{--bg:#0b1b22;--panel:#0e252e;--ink:#e8f6f2;--muted:#9fc6bb;--accent:#17c8a5;--good:#1fd38f;--bad:#ff6b6b}
-  html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,Segoe UI,Roboto,Inter,sans-serif}
   .wrap{max-width:880px;margin:auto;padding:16px 14px 80px}
   header{display:flex;align-items:center;gap:12px;margin:8px 0 18px}
   .title{font-weight:800;font-size:26px}
   .tag{color:var(--muted);font-size:13px}
   .spacer{flex:1}
-  .logo{width:44px;height:44px;border-radius:10px;background:#062027;display:grid;place-items:center}
+  .logo{width:44px;height:44px;border-radius:10px;overflow:hidden}
+  .logo img{width:100%;height:100%;object-fit:contain}
   .card{background:linear-gradient(180deg,#0e262f,#0e2127);border:1px solid #13333d;border-radius:14px;padding:16px;box-shadow:0 10px 24px rgba(0,0,0,.25)}
   .grid{display:grid;gap:12px}
   .two{grid-template-columns:1fr 1fr}
   .btn{background:var(--accent);border:none;color:#062027;font-weight:800;padding:12px 14px;border-radius:12px;cursor:pointer}
   .btn.alt{background:#153943;color:#cdeee7;border:1px solid #24535f}
-  input[type="text"],input[type="file"],input[type="password"]{background:#0a1d24;border:1px solid #173842;color:var(--ink);padding:11px 12px;border-radius:10px;outline:none}
+  input[type="text"],input[type="password"],input[type="file"]{
+    background:#0a1d24;border:1px solid #173842;color:var(--ink);
+    padding:11px 12px;border-radius:10px;outline:none
+  }
+  /* Style the file input button */
+  input[type="file"]::file-selector-button{
+    background:var(--accent);color:#062027;border:none;font-weight:800;
+    padding:8px 12px;border-radius:10px;cursor:pointer;margin-right:10px
+  }
+  input[type="file"]:hover::file-selector-button{filter:brightness(1.05)}
   .pfp{width:84px;height:84px;border-radius:16px;object-fit:cover;border:1px solid #23444f;background:#0b1e25}
   .qtxt{font-size:20px;font-weight:700;margin:0 0 10px}
   .options{display:grid;gap:10px}
@@ -30,6 +40,7 @@
   .chip{background:#0a1d23;border:1px solid #173741;color:#bfeee4;padding:6px 10px;border-radius:999px;font-size:13px}
   footer{position:fixed;left:0;right:0;bottom:0;padding:10px 14px;text-align:center;color:#96cfc3;background:linear-gradient(180deg,transparent,rgba(0,0,0,.35))}
   footer b{color:#d8fff7}
+  .center{text-align:center}
 </style>
 </head>
 <body>
@@ -41,26 +52,38 @@
     </div>
     <div class="spacer"></div>
     <div class="logo">
-      <img src="fermah-logo.png" alt="Fermah" style="width:30px;height:30px">
+      <img src="fermah-logo.png" alt="Fermah Logo">
     </div>
   </header>
 
   <!-- LOGIN -->
   <section id="login" class="card grid">
     <div class="grid two">
-      <div class="field">
-        <label>Create account</label>
+      <div>
+        <label>Choose Username</label>
         <input id="name" type="text" placeholder="Username" />
+        <label>Choose Image</label>
         <input id="pfp" type="file" accept="image/png,image/jpeg" />
         <input id="passCreate" type="password" placeholder="Password (min 6 chars)" />
         <button class="btn" id="createBtn">Create & Continue</button>
       </div>
-      <div class="field">
+      <div>
         <label>Or log in</label>
         <select id="loginSelect"></select>
         <input id="passLogin" type="password" placeholder="Password" />
         <button class="btn alt" id="loginBtn">Login</button>
       </div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="card" style="display:none">
+    <div class="center">
+      <img id="dashPfp" class="pfp" alt="">
+      <h2 id="dashName"></h2>
+      <p id="dashStats"></p>
+      <button class="btn" id="startQuiz">Start Quiz</button>
+      <button class="btn alt" id="logoutBtn">Logout</button>
     </div>
   </section>
 
@@ -78,19 +101,14 @@
 
   <!-- RESULT -->
   <section id="result" class="card" style="display:none">
-    <div class="grid two">
-      <div class="center">
-        <img id="resPfp" class="pfp" alt="">
-        <div style="font-weight:800;margin-top:8px" id="resName"></div>
-      </div>
-      <div>
-        <div class="qtxt">Your Proof-IQ</div>
-        <div id="resIQ" style="font-size:40px;font-weight:900;color:var(--accent)"></div>
-        <div id="resSummary"></div>
-      </div>
-    </div>
-    <div class="grid two" style="margin-top:12px">
+    <div class="center">
+      <img id="resPfp" class="pfp" alt="">
+      <div style="font-weight:800;margin-top:8px" id="resName"></div>
+      <h3>Your Proof-IQ</h3>
+      <div id="resIQ" style="font-size:40px;font-weight:900;color:var(--accent)"></div>
+      <p id="resSummary"></p>
       <button class="btn" id="playAgain">Play Again</button>
+      <button class="btn alt" id="backDash">Back to Dashboard</button>
     </div>
   </section>
 </div>
@@ -98,45 +116,53 @@
 <footer>Made by <b>FreeGuyx247</b> • Community fan project</footer>
 
 <script>
-/* ---------- Globals ---------- */
+/* ----- Globals ----- */
 let currentUser=null, quizSize=10, timerId=null, questions=[], idx=0, score=0, startTs=0;
 
-/* ---------- Profiles ---------- */
+/* ----- Profiles (local) ----- */
 function loadProfiles(){ try{return JSON.parse(localStorage.getItem('fermah_profiles')||'[]')}catch{return[]} }
 function saveProfiles(arr){ localStorage.setItem('fermah_profiles', JSON.stringify(arr)) }
-function refreshLoginSelect(){
-  const sel=document.getElementById('loginSelect'); sel.innerHTML='';
-  loadProfiles().forEach((p,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=p.name; sel.appendChild(o); });
-}
-async function fileToDataURL(f){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); }) }
+function refreshLoginSelect(){ const sel=document.getElementById('loginSelect'); sel.innerHTML=''; loadProfiles().forEach((p,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=p.name; sel.appendChild(o); }); }
+function fileToDataURL(f){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); }); }
 
-/* ---------- Create ---------- */
+/* ----- Create ----- */
 document.getElementById('createBtn').onclick=async ()=>{
   const name=document.getElementById('name').value.trim();
-  if(!name) return alert("Enter name");
   const pass=document.getElementById('passCreate').value;
-  if(!pass||pass.length<6) return alert("Password min 6 chars");
-  const pfpFile=document.getElementById('pfp').files[0];
-  const pfp=pfpFile?await fileToDataURL(pfpFile):'';
+  const file=document.getElementById('pfp').files[0];
+  if(!name||!pass) return alert("Fill all fields");
+  const pfp=file?await fileToDataURL(file):"";
   const list=loadProfiles();
-  list.push({name,pass, pfp});
-  saveProfiles(list); refreshLoginSelect(); alert("Account created! Please login.");
+  if(list.some(p=>p.name.toLowerCase()===name.toLowerCase())) return alert("Username exists");
+  list.push({name,pass,pfp,bestIQ:0,lastIQ:0});
+  saveProfiles(list); refreshLoginSelect();
+  alert("Account created. Please log in.");
 };
 
-/* ---------- Login ---------- */
+/* ----- Login ----- */
 document.getElementById('loginBtn').onclick=()=>{
   const list=loadProfiles(); const i=document.getElementById('loginSelect').value|0; const user=list[i];
   if(!user) return;
   if(user.pass!==document.getElementById('passLogin').value) return alert("Wrong password");
-  currentUser=user; startQuiz();
+  currentUser=user; showDashboard();
 };
 
-/* ---------- Question Bank (100 items) ---------- */
-const BANK = [
+/* ----- Dashboard ----- */
+function showDashboard(){
+  document.getElementById('login').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  document.getElementById('dashName').textContent=currentUser.name;
+  document.getElementById('dashPfp').src=currentUser.pfp||"";
+  document.getElementById('dashStats').textContent=`Best IQ: ${currentUser.bestIQ||0} • Last IQ: ${currentUser.lastIQ||0}`;
+}
+document.getElementById('logoutBtn').onclick=()=>{currentUser=null; document.getElementById('dashboard').style.display='none'; document.getElementById('login').style.display='block';};
+
+/* ----- Question bank (100 sample) ----- */
+const BANK=[
  {q:"What is Fermah?", a:["A universal market for zero-knowledge proofs","A DEX","A wallet","A bridge"], i:0},
  {q:"Who submits proof jobs to Fermah?", a:["Seekers","Miners","Relayers","Indexers"], i:0},
  {q:"Who generates proofs in Fermah?", a:["Prover Nodes","Sequencers","Auditors","RPC nodes"], i:0},
- {q:"Who checks proofs?", a:["Verifiers","Provers","Bridges","Wallets"], i:0},
+ {q:"Who checks proofs in Fermah?", a:["Verifiers","Provers","Bridges","Wallets"], i:0},
  {q:"Fermah’s goal is to make proofs…", a:["Cheap, fast, and reliable","Exclusive and expensive","Private to one vendor","Tied to one chain"], i:0},
  {q:"‘Credibly neutral’ in Fermah means…", a:["No vendor/chain bias","Prefer a single SNARK","Prefer L2s only","Favor one zkVM"], i:0},
  {q:"Universal proving means Fermah can handle…", a:["Multiple proof systems, chains, and VMs","Only STARKs","Only Groth16","Only Ethereum"], i:0},
@@ -194,7 +220,7 @@ const BANK = [
  {q:"Public inputs are usually…", a:["Committed or passed to verifier","Never used","Encrypted only","Random"], i:0},
  {q:"ZK proof should convince verifier…", a:["Statement true w/o revealing witness","Wallet is rich","Gas is cheap","Curve is safe"], i:0},
  {q:"Memory-hard steps mostly affect…", a:["Prover","Verifier","Wallet","RPC"], i:0},
- {q:"STARKs avoid trusted setup using…", a:["FRI+hash commitments","KZG only","Pairings","Multi-sigs"], i:0},
+ {q:"STARKs avoid trusted setup using…", a:["FRI + hash commitments","KZG only","Pairings","Multi-sigs"], i:0},
  {q:"SNARK often relies on…", a:["Pairings or commitments","FRI only","Bridges","L1 consensus"], i:0},
  {q:"Circuit compilation targets often include…", a:["R1CS/PLONKish/AIR","SQL","PNG","WASM UI only"], i:0},
  {q:"zkEVM proves…", a:["EVM execution correctness","Wallet balance","Gas burn","Bridged tokens"], i:0},
@@ -222,7 +248,7 @@ const BANK = [
  {q:"Rollups post data to L1 for…", a:["Data availability","Extra gas","MEV","Bridging"], i:0},
 
  {q:"Circuit arithmetization maps logic to…", a:["Field equations/constraints","Calldata ABI","EVM opcodes","Solidity"], i:0},
- {q:"Constraint system proves the relation between…", a:["Inputs & program","Wallet & gas","Chain & slot","Bridge & L2"], i:0},
+ {q:"Constraint system proves relation between…", a:["Inputs & program","Wallet & gas","Chain & slot","Bridge & L2"], i:0},
  {q:"Witness generation happens during…", a:["Proving","Verification","Compilation","Deployment"], i:0},
  {q:"Verification is typically…", a:["Fast","Slower than proving","Interactive","GPU only"], i:0},
  {q:"Proof compression by recursion reduces…", a:["Chain verify cost","Prover memory","Circuit size","Setup size"], i:0},
@@ -241,68 +267,62 @@ const BANK = [
  {q:"In Fermah UI, a Seeker’s request becomes…", a:["A job in the market","A block","A bridge","A faucet"], i:0},
  {q:"Provers advertise…", a:["Capabilities/price/latency","Twitter handle","NFTs","Seed"], i:0},
  {q:"Verifiers should be…", a:["Deterministic & cheap","Random","Off-chain only","GPU-heavy"], i:0},
- {q:"Main risk without market transparency?", a:["Unclear/volatile pricing","Too many proofs","Perfect fairness","No hashing"], i:0}
+ {q:"Main risk without market transparency?", a:["Unclear/volatile pricing","Too many proofs","Perfect fairness","No hashing"], i:0},
+
+ {q:"What is ‘vendor lock-in’?", a:["Being stuck with one provider","Open sourcing a prover","Using open standards","Having many options"], i:0},
+ {q:"Why is utilization important?", a:["Higher use lowers per-proof cost","It raises gas","It adds MEV","It slows verification"], i:0},
+ {q:"What mainly drives prover cost?", a:["Compute time + energy","Wallet fees","Block size","Relays"], i:0},
+ {q:"What does a Verifier contract store?", a:["Verification key(s) & logic","User passwords","Wallet mnemonics","Price feeds"], i:0},
+ {q:"Which helps latency the most?", a:["Matching jobs to capable hardware","Bigger calldata","More UI themes","Longer keys"], i:0},
+ {q:"Which is a ZK-friendly hash?", a:["Poseidon","Keccak only","MD5","CRC32"], i:0},
+ {q:"Which curve pair is common in ZK?", a:["BLS12-381 / BN254","secp256k1 / P-256","Curve25519 / ed448","Koblitz only"], i:0},
+ {q:"What do Merkle proofs show?", a:["Inclusion in a committed set","Block finality","Sequencer fairness","Gas refund"], i:0},
+ {q:"What’s a common use of recursion?", a:["Aggregating many proofs","Hashing calldata","Signing blocks","Issuing tokens"], i:0},
+ {q:"What is a Seeker’s main concern?", a:["Cost, speed, and reliability","Wallet themes","NFT rarity","Gas token color"], i:0}
+];
+</script>,
+ // ... (fill with 100 like before)
 ];
 
-/* ---------- Quiz ---------- */
-function pickRandom(n, arr=BANK){ const a=[...arr]; a.sort(()=>Math.random()-0.5); return a.slice(0,n); }
+/* ----- Quiz ----- */
+function pickRandom(n,arr=BANK){const a=[...arr];a.sort(()=>Math.random()-0.5);return a.slice(0,n);}
+document.getElementById('startQuiz').onclick=startQuiz;
 function startQuiz(){
-  document.getElementById('login').style.display='none';
+  document.getElementById('dashboard').style.display='none';
   document.getElementById('quiz').style.display='block';
-  document.getElementById('result').style.display='none';
-  document.getElementById('hudUser').textContent=`👤 ${currentUser.name}`;
-  document.getElementById('hudScore').textContent=0;
-  document.getElementById('hudTotal').textContent=quizSize;
-  document.getElementById('hudTime').textContent='0s';
-
-  questions = pickRandom(quizSize).map(q=>{
-    const opts=[...q.a].map((t,i)=>({t,i}));
-    opts.sort(()=>Math.random()-0.5);
-    return {q:q.q, opts, correct:opts.findIndex(o=>o.i===q.i)};
-  });
-  idx=0; score=0; startTs=Date.now();
-  if(timerId) clearInterval(timerId);
-  timerId=setInterval(()=>document.getElementById('hudTime').textContent=Math.floor((Date.now()-startTs)/1000)+'s',500);
+  questions=pickRandom(quizSize); idx=0; score=0; startTs=Date.now();
+  if(timerId) clearInterval(timerId); timerId=setInterval(()=>document.getElementById('hudTime').textContent=Math.floor((Date.now()-startTs)/1000)+'s',500);
   showQuestion();
 }
 function showQuestion(){
-  if(idx>=questions.length){ endQuiz(); return; }
-  document.getElementById('hudIdx').textContent=idx+1;
-  const it=questions[idx];
+  if(idx>=questions.length){endQuiz();return;}
+  const it=questions[idx]; document.getElementById('hudIdx').textContent=idx+1; document.getElementById('hudTotal').textContent=quizSize;
   document.getElementById('question').textContent=it.q;
   const box=document.getElementById('options'); box.innerHTML='';
-  it.opts.forEach((o,i)=>{
-    const b=document.createElement('button');
-    b.className='option'; b.textContent=o.t;
-    b.onclick=()=>selectAnswer(i,b,it);
-    box.appendChild(b);
-  });
+  it.a.forEach((t,i)=>{const b=document.createElement('button'); b.className='option'; b.textContent=t; b.onclick=()=>selectAnswer(i,it.i,b); box.appendChild(b);});
 }
-function selectAnswer(i,btn,it){
+function selectAnswer(i,correct,btn){
   [...document.querySelectorAll('.option')].forEach(x=>x.disabled=true);
-  if(i===it.correct){ score++; btn.classList.add('correct'); }
-  else { btn.classList.add('wrong'); }
+  if(i===correct){score++;btn.classList.add('correct');}else{btn.classList.add('wrong');}
   document.getElementById('hudScore').textContent=score;
-  setTimeout(()=>{ idx++; showQuestion(); },600);
+  setTimeout(()=>{idx++;showQuestion();},600);
 }
 function endQuiz(){
   clearInterval(timerId);
-  const total=questions.length, secs=Math.floor((Date.now()-startTs)/1000)||1, acc=score/total;
+  const secs=Math.floor((Date.now()-startTs)/1000)||1, acc=score/quizSize;
   const iq=Math.round(60+40*acc+Math.min(20,200/secs));
-  document.getElementById('quiz').style.display='none';
-  document.getElementById('result').style.display='block';
+  document.getElementById('quiz').style.display='none'; document.getElementById('result').style.display='block';
   document.getElementById('resName').textContent=currentUser.name;
-  document.getElementById('resPfp').src=currentUser.pfp||'';
+  document.getElementById('resPfp').src=currentUser.pfp||"";
   document.getElementById('resIQ').textContent=iq;
-  document.getElementById('resSummary').textContent=`Score: ${score}/${total} • Accuracy ${(acc*100).toFixed(0)}% • Time ${secs}s`;
+  document.getElementById('resSummary').textContent=`Score: ${score}/${quizSize} • Accuracy ${(acc*100).toFixed(0)}% • Time ${secs}s`;
+  currentUser.lastIQ=iq; if(iq>currentUser.bestIQ) currentUser.bestIQ=iq;
+  const list=loadProfiles(); const idxp=list.findIndex(p=>p.name===currentUser.name); if(idxp>=0) list[idxp]=currentUser; saveProfiles(list);
 }
-document.getElementById('playAgain').onclick=()=>{ startQuiz(); };
+document.getElementById('playAgain').onclick=startQuiz;
+document.getElementById('backDash').onclick=()=>{document.getElementById('result').style.display='none';showDashboard();};
 
-/* ---------- Boot ---------- */
-function refreshLogin(){ const sel=document.getElementById('loginSelect'); sel.innerHTML=''; loadProfiles().forEach((p,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=p.name; sel.appendChild(o); }); }
-function loadProfiles(){ try{return JSON.parse(localStorage.getItem('fermah_profiles')||'[]')}catch{return[]} }
-function saveProfiles(arr){ localStorage.setItem('fermah_profiles', JSON.stringify(arr)) }
-async function fileToDataURL(f){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); }) }
+/* ----- Init ----- */
 refreshLoginSelect();
 </script>
 </body>
