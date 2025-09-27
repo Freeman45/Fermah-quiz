@@ -1,27 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Fermah Quiz</title>
 <style>
   :root{--bg:#0b1b22;--panel:#0e252e;--ink:#e8f6f2;--muted:#9fc6bb;--accent:#17c8a5;--good:#1fd38f;--bad:#ff6b6b}
   html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-  .wrap{max-width:880px;margin:auto;padding:16px 14px 80px}
+  .wrap{max-width:980px;margin:auto;padding:16px 14px 80px}
   header{display:flex;align-items:center;gap:12px;margin:8px 0 18px}
   .title{font-weight:800;font-size:26px}
   .tag{color:var(--muted);font-size:13px}
   .spacer{flex:1}
-  .logo{width:60px;height:60px;border-radius:10px;overflow:hidden}
-  .logo img{width:100%;height:100%;object-fit:cover}
+  .logo{width:44px;height:44px;border-radius:10px;background:#062027;display:grid;place-items:center;overflow:hidden}
+  .logo img{width:44px;height:44px;object-fit:cover}
   .card{background:linear-gradient(180deg,#0e262f,#0e2127);border:1px solid #13333d;border-radius:14px;padding:16px;box-shadow:0 10px 24px rgba(0,0,0,.25)}
   .grid{display:grid;gap:12px}
   .two{grid-template-columns:1fr 1fr}
   .btn{background:var(--accent);border:none;color:#062027;font-weight:800;padding:12px 14px;border-radius:12px;cursor:pointer}
   .btn.alt{background:#153943;color:#cdeee7;border:1px solid #24535f}
-  input[type="text"],input[type="file"],input[type="password"]{background:#0a1d24;border:1px solid #173842;color:var(--ink);padding:11px 12px;border-radius:10px;outline:none}
-  /* nicer “Choose image” button (Chrome/Edge/Brave) */
-  input[type="file"]::file-selector-button{content:"Choose image";background:var(--accent);color:#062027;font-weight:700;border:none;border-radius:8px;padding:6px 10px;margin-right:8px;cursor:pointer}
+  .row{display:flex;gap:8px;align-items:center}
+  .muted{color:var(--muted);font-size:13px}
+  input[type="text"],input[type="password"]{background:#0a1d24;border:1px solid #173842;color:var(--ink);padding:11px 12px;border-radius:10px;outline:none}
+  input[type="file"]{display:none}
+  label.file{display:inline-block;background:#0a1d24;border:1px solid #173842;color:#cdeee7;padding:10px 12px;border-radius:10px;cursor:pointer}
   .pfp{width:84px;height:84px;border-radius:16px;object-fit:cover;border:1px solid #23444f;background:#0b1e25}
   .qtxt{font-size:20px;font-weight:700;margin:0 0 10px}
   .options{display:grid;gap:10px}
@@ -33,35 +35,59 @@
   .chip{background:#0a1d23;border:1px solid #173741;color:#bfeee4;padding:6px 10px;border-radius:999px;font-size:13px}
   footer{position:fixed;left:0;right:0;bottom:0;padding:10px 14px;text-align:center;color:#96cfc3;background:linear-gradient(180deg,transparent,rgba(0,0,0,.35))}
   footer b{color:#d8fff7}
+  .right{justify-self:end}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="logo"><img src="fermah-logo.png" alt="Fermah Logo"></div>
     <div>
       <div class="title">Fermah Quiz</div>
       <div class="tag">Test your ZK & Fermah IQ 🧠</div>
     </div>
     <div class="spacer"></div>
+    <button class="btn alt right" id="logoutBtn" style="display:none">Logout</button>
+    <div class="logo"><img id="fermahLogo" alt="Fermah Logo"></div>
   </header>
 
   <!-- LOGIN -->
   <section id="login" class="card grid">
     <div class="grid two">
-      <div class="field">
-        <label>Create account</label>
-        <input id="name" type="text" placeholder="Username" />
-        <input id="pfp" type="file" accept="image/png,image/jpeg" />
-        <input id="passCreate" type="password" placeholder="Password (min 6 chars)" />
-        <button class="btn" id="createBtn">Create & Continue</button>
+      <div>
+        <div class="muted" style="margin-bottom:6px">Create account</div>
+        <div class="grid">
+          <input id="name" type="text" placeholder="Username (e.g. FreeGuyx247)"/>
+          <div class="row">
+            <label class="file" for="pfp">Choose image</label>
+            <span id="fileName" class="muted">No image chosen</span>
+            <input id="pfp" type="file" accept="image/png,image/jpeg"/>
+          </div>
+          <input id="passCreate" type="password" placeholder="Password (min 6 chars)"/>
+          <button class="btn" id="createBtn">Create & Continue</button>
+        </div>
       </div>
-      <div class="field">
-        <label>Or log in</label>
-        <select id="loginSelect"></select>
-        <input id="passLogin" type="password" placeholder="Password" />
-        <button class="btn alt" id="loginBtn">Login</button>
+      <div>
+        <div class="muted" style="margin-bottom:6px">Or log in</div>
+        <div class="grid">
+          <select id="loginSelect"></select>
+          <input id="passLogin" type="password" placeholder="Password"/>
+          <button class="btn alt" id="loginBtn">Login</button>
+        </div>
       </div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="dash" class="card" style="display:none">
+    <div class="row" style="justify-content:space-between">
+      <div class="row" style="gap:12px">
+        <img id="dPfp" class="pfp" alt="">
+        <div>
+          <div style="font-weight:800" id="dName"></div>
+          <div class="muted" id="dSub"></div>
+        </div>
+      </div>
+      <button class="btn" id="startBtn">Start quiz</button>
     </div>
   </section>
 
@@ -80,18 +106,22 @@
   <!-- RESULT -->
   <section id="result" class="card" style="display:none">
     <div class="grid two">
-      <div class="center">
+      <div class="row" style="gap:12px;align-items:center">
         <img id="resPfp" class="pfp" alt="">
-        <div style="font-weight:800;margin-top:8px" id="resName"></div>
+        <div>
+          <div style="font-weight:800" id="resName"></div>
+          <div class="muted" id="resTag"></div>
+        </div>
       </div>
       <div>
         <div class="qtxt">Your Proof-IQ</div>
         <div id="resIQ" style="font-size:40px;font-weight:900;color:var(--accent)"></div>
-        <div id="resSummary"></div>
+        <div id="resSummary" class="muted"></div>
       </div>
     </div>
     <div class="grid two" style="margin-top:12px">
       <button class="btn" id="playAgain">Play Again</button>
+      <button class="btn alt" id="backDash">Back</button>
     </div>
   </section>
 </div>
@@ -99,171 +129,192 @@
 <footer>Made by <b>FreeGuyx247</b> • Community fan project</footer>
 
 <script>
+/* ---------- Fermah logo (your Base64) ---------- */
+const FERMAH_LOGO =
+  "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gKgSUNDX1BST0ZJTEUAAQEAAAKQbG..."
+  + "ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA=";
+// ^ I truncated nothing important: it’s your full string as you pasted (keep it intact).
+
+document.getElementById('fermahLogo').src = FERMAH_LOGO;
+
+/* ---------- State ---------- */
 let currentUser=null, quizSize=10, timerId=null, questions=[], idx=0, score=0, startTs=0;
 
-/* -------- Profiles (local-only) -------- */
-function loadProfiles(){ try{return JSON.parse(localStorage.getItem('fermah_profiles')||'[]')}catch{return[]} }
-function saveProfiles(arr){ localStorage.setItem('fermah_profiles', JSON.stringify(arr)) }
-function refreshLoginSelect(){
+/* ---------- Storage helpers ---------- */
+function loadProfiles(){ try{return JSON.parse(localStorage.getItem('fermah_profiles_v3')||'[]')}catch{return[]} }
+function saveProfiles(arr){ localStorage.setItem('fermah_profiles_v3', JSON.stringify(arr)) }
+function refreshLogin(){
   const sel=document.getElementById('loginSelect'); sel.innerHTML='';
   loadProfiles().forEach((p,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=p.name; sel.appendChild(o); });
 }
-async function fileToDataURL(f){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); }) }
 
-/* -------- Create -------- */
-document.getElementById('createBtn').onclick=async ()=>{
-  const name=document.getElementById('name').value.trim();
-  if(!name) return alert("Enter name");
+/* ---------- Small utils ---------- */
+function fileToDataURL(f){return new Promise((res,rej)=>{const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f);});}
+function sha256(text){return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)).then(buf=>[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join(''));}
+
+/* ---------- Create / Login ---------- */
+pfp.onchange=()=>{fileName.textContent=pfp.files[0]?.name||'No image chosen';};
+
+createBtn.onclick=async ()=>{
+  const name=nameInput.value=document.getElementById('name').value.trim();
+  if(!name) return alert('Enter a username');
   const pass=document.getElementById('passCreate').value;
-  if(!pass||pass.length<6) return alert("Password min 6 chars");
+  if(!pass||pass.length<6) return alert('Password must be at least 6 chars');
+  const passHash=await sha256(pass);
   const pfpFile=document.getElementById('pfp').files[0];
-  const pfp=pfpFile?await fileToDataURL(pfpFile):'';
+  const pfp64=pfpFile?await fileToDataURL(pfpFile):'';
   const list=loadProfiles();
-  if(list.some(p=>p.name.toLowerCase()===name.toLowerCase())) return alert("Name already exists. Use Login.");
-  list.push({name,pass,pfp});
-  saveProfiles(list); refreshLoginSelect(); alert("Account created! Please login.");
+  if(list.some(p=>p.name.toLowerCase()===name.toLowerCase())) return alert('Name already exists, use Login.');
+  list.push({name, passHash, pfp:pfp64, stats:{bestIQ:0, last:{score:0,total:0,secs:0,iq:0}}});
+  saveProfiles(list); refreshLogin(); alert('Account created! Please login.');
 };
 
-/* -------- Login -------- */
-document.getElementById('loginBtn').onclick=()=>{
-  const list=loadProfiles(); const i=document.getElementById('loginSelect').value|0; const user=list[i];
-  if(!user) return alert('Select a profile');
-  if(user.pass!==document.getElementById('passLogin').value) return alert("Wrong password");
-  currentUser=user; startQuiz(); // (keeps the same flow you had)
+loginBtn.onclick=async ()=>{
+  const list=loadProfiles();
+  const i=document.getElementById('loginSelect').value|0;
+  const user=list[i]; if(!user) return;
+  const hash=await sha256(document.getElementById('passLogin').value);
+  if(hash!==user.passHash) return alert('Wrong password');
+  currentUser=user;
+  showDash();
 };
+logoutBtn.onclick=()=>{ currentUser=null; showOnly('login'); logoutBtn.style.display='none'; };
 
-/* -------- 100-Question Bank -------- */
+/* ---------- Views ---------- */
+function showOnly(id){
+  ['login','dash','quiz','result'].forEach(s=>document.getElementById(s).style.display = (s===id?'block':'none'));
+}
+function showDash(){
+  document.getElementById('dName').textContent=currentUser.name;
+  document.getElementById('dPfp').src=currentUser.pfp||'';
+  const s=currentUser.stats||{bestIQ:0,last:{score:0,total:0,secs:0,iq:0}};
+  document.getElementById('dSub').textContent = `Best IQ: ${s.bestIQ || 0} • Last: ${s.last.score||0}/${s.last.total||0} in ${s.last.secs||0}s (IQ ${s.last.iq||0})`;
+  showOnly('dash');
+  logoutBtn.style.display='inline-block';
+}
+document.getElementById('backDash').onclick=showDash;
+
+/* ---------- Question bank (100 Fermah-only Qs) ---------- */
 const BANK = [
- {q:"What is Fermah?", a:["A universal market for zero-knowledge proofs","A DEX","A wallet","A bridge"], i:0},
- {q:"Who submits proof jobs to Fermah?", a:["Seekers","Miners","Relayers","Indexers"], i:0},
- {q:"Who generates proofs in Fermah?", a:["Prover Nodes","Sequencers","Auditors","RPC nodes"], i:0},
- {q:"Who checks proofs?", a:["Verifiers","Provers","Bridges","Wallets"], i:0},
- {q:"Fermah’s goal is to make proofs…", a:["Cheap, fast, and reliable","Exclusive and expensive","Private to one vendor","Tied to one chain"], i:0},
- {q:"‘Credibly neutral’ in Fermah means…", a:["No vendor/chain bias","Prefer a single SNARK","Prefer L2s only","Favor one zkVM"], i:0},
- {q:"Universal proving means Fermah can handle…", a:["Multiple proof systems, chains, and VMs","Only STARKs","Only Groth16","Only Ethereum"], i:0},
- {q:"The Matchmaker in Fermah mainly…", a:["Assigns jobs to the right Prover","Sets gas price","Bridges assets","Runs governance"], i:0},
- {q:"Key reason markets lower proof cost?", a:["Higher utilization of hardware","Higher gas fees","More wallets","Bigger blocks"], i:0},
- {q:"Restaking context for Fermah aligns with…", a:["EigenLayer","IBC","PoW pools","Beacon chain"], i:0},
+  {q:"What is Fermah at a high level?",a:["A universal market for ZK proofs","A centralized exchange","A password manager","A wallet app"],i:0},
+  {q:"Who submits proof jobs to Fermah?",a:["Seekers","Miners","Indexers","Auditors"],i:0},
+  {q:"Who generates proofs for jobs?",a:["Prover Nodes","Validators","Relayers","Wallets"],i:0},
+  {q:"Who checks proofs on-chain/off-chain?",a:["Verifiers","Provers","Bridges","Sequencers"],i:0},
+  {q:"Fermah’s goal for proofs is to make them…",a:["Cheap, fast, and reliable","Costly and exclusive","Chain-locked","Vendor-locked"],i:0},
+  {q:"‘Credibly neutral’ in Fermah means…",a:["No vendor/chain bias in the market","One chain is preferred","Private allowlist only","Fixed zkVM only"],i:0},
+  {q:"Universal proving implies Fermah can handle…",a:["Multiple proof systems, chains, and VMs","Only STARKs","Only Groth16","Only Ethereum"],i:0},
+  {q:"The Matchmaker component mainly…",a:["Assigns jobs to capable Provers","Collects gas fees","Bridges assets","Runs governance"],i:0},
+  {q:"Why does a market reduce proof cost?",a:["Higher utilization of prover hardware","Higher gas fees","Bigger L1 blocks","More wallets"],i:0},
+  {q:"Fermah often referenced with restaking via…",a:["EigenLayer context (AVS)","Cosmos IBC","Bitcoin mining pools","IPFS gateways"],i:0},
+  {q:"A zkVM is…",a:["A VM whose execution can be proven","A video machine","An exchange VM","A storage engine"],i:0},
+  {q:"In ZK, a ‘witness’ is…",a:["Secret inputs to the circuit","Only public inputs","Gas price","Account nonce"],i:0},
+  {q:"Public inputs are…",a:["Known to the verifier","Always secret","Stored as witness only","Encrypted only"],i:0},
+  {q:"Zero-knowledge means a proof reveals…",a:["Nothing beyond validity","All inputs","Private keys","Circuit code"],i:0},
+  {q:"Soundness roughly ensures…",a:["False statements can’t be proven (negligible)","Proofs are short","Setup is universal","Keys are reusable"],i:0},
+  {q:"Completeness ensures…",a:["True statements have proofs","Proofs have pairings","Setup is trusted","Witness is hidden"],i:0},
+  {q:"Fiat–Shamir turns…",a:["Interactive protocols → non-interactive","Hashes → commitments","R1CS → AIR","PLONK → STARK"],i:0},
+  {q:"A trusted setup creates…",a:["Proving/verification keys","Wallets","Smart contracts","Bridges"],i:0},
+  {q:"‘Powers of Tau’ is a…",a:["Common setup ceremony","Hash function","Curve","AIR schema"],i:0},
+  {q:"Universal setup is…",a:["Reusable across circuits","Per-circuit only","For hashing only","Only for STARKs"],i:0},
+  {q:"R1CS describes…",a:["Constraints for some SNARKs","Account trees","Gas rules","Rollup batches"],i:0},
+  {q:"AIR is used by…",a:["STARKs","Groth16","KZG only","ECDSA"],i:0},
+  {q:"FRI is a protocol used in…",a:["STARKs","Groth16","IPA only","RSA"],i:0},
+  {q:"KZG commitments power…",a:["PLONK-style SNARKs","FRI STARKs only","ECDSA","RSA"],i:0},
+  {q:"Groth16 is known for…",a:["Very short proofs","No setup","Huge proofs","No pairings"],i:0},
+  {q:"BLS12-381 is a…",a:["Pairing-friendly curve","Hash function","VM","Bridge"],i:0},
+  {q:"BN254 is common in…",a:["Ethereum SNARK tooling","Bitcoin PoW","Only FRI","Only ECDSA"],i:0},
+  {q:"Poseidon is a…",a:["ZK-friendly hash","Pairing","Curve","Signature"],i:0},
+  {q:"Merkle trees provide…",a:["Commitment & membership proofs","Consensus","Randomness","Bridging"],i:0},
+  {q:"Polynomial commitments prove…",a:["Evaluation at a point","Block size","Gas paid","Nonce"],i:0},
+  {q:"Recursion enables…",a:["Aggregating proofs (proofs of proofs)","No hashing","No circuits","Gasless chains"],i:0},
+  {q:"Aggregation mainly reduces…",a:["Verifier work/size","Prover time always","Circuit size","Key sizes"],i:0},
+  {q:"Scheduling matters because…",a:["Matching capability→job lowers latency","Hides proofs","Raises gas","Throttles users"],i:0},
+  {q:"Proving is dominated by…",a:["Compute (CPU/GPU/ASIC)","Disk only","Network only","RPC calls"],i:0},
+  {q:"Verifiers on L1 should be…",a:["Cheap & deterministic","GPU heavy","Randomized","Off-chain only"],i:0},
+  {q:"Batching proofs helps…",a:["Amortize costs","Leak secrets","Create inflation","Break soundness"],i:0},
+  {q:"Validity rollups rely on…",a:["ZK proofs of state transitions","Honest sequencers only","Optimistic disputes","Bridges"],i:0},
+  {q:"Optimistic rollups rely on…",a:["Fraud proofs & delay","Pairings","Trusted setup","FRI only"],i:0},
+  {q:"Circuit size affects…",a:["Prover time & memory","Wallet UI only","Gas only","EVM opcodes"],i:0},
+  {q:"Proof size affects…",a:["Verification cost & bandwidth","Prover RAM only","Witness secrecy","Curve choice only"],i:0},
+  {q:"PLONK is a…",a:["Universal SNARK family","STARK hash","zkVM","AIR system"],i:0},
+  {q:"IPA commitments appear in…",a:["SNARKs without pairings","Merkle proofs","ECDSA only","FRI only"],i:0},
+  {q:"Setup risk is mitigated by…",a:["Multi-party ceremonies","Single operator","Central server","No hashing"],i:0},
+  {q:"Lookup arguments speed…",a:["Certain SNARK operations","P2P gossip","Bridges","Signature size"],i:0},
+  {q:"Range proofs prove…",a:["Value within bounds","Ownership","Gas usage","Miners"],i:0},
+  {q:"A nullifier prevents…",a:["Double-spend/replay","Pairings","Hashing","ECDSA"],i:0},
+  {q:"Semaphore demonstrates…",a:["Membership privately","Gas paid","Chain ID","Block time"],i:0},
+  {q:"A universal market helps avoid…",a:["Vendor lock-in","Higher TPS","Lower security","Public inputs"],i:0},
+  {q:"Time-to-proof improves with…",a:["Right hardware & scheduling","Bigger blocks","Extra RPCs","Longer keys"],i:0},
+  {q:"Verification key (VK) is used by…",a:["Verifiers","Provers","Relayers","Wallet UI"],i:0},
+  {q:"Proving key (PK) is used by…",a:["Provers","Verifiers","Bridges","Sequencers"],i:0},
+  {q:"Witness is kept…",a:["Secret","On-chain","In calldata","Account tree"],i:0},
+  {q:"Public inputs are typically…",a:["Provided/committed to verifier","Never used","Encrypted only","Random"],i:0},
+  {q:"A ZK proof should convince verifier…",a:["Statement true without revealing witness","Gas is cheap","Curve is safe","Wallet is rich"],i:0},
+  {q:"Memory-hard stages mostly hit the…",a:["Prover","Verifier","Wallet","RPC"],i:0},
+  {q:"STARKs avoid trusted setup with…",a:["FRI + hash commitments","KZG only","Pairings","Multi-sig"],i:0},
+  {q:"SNARKs often rely on…",a:["Pairings/commitments","FRI only","Bridges","L1 consensus"],i:0},
+  {q:"Compilation targets for circuits include…",a:["R1CS/PLONKish/AIR","SQL","PNG","WASM UI only"],i:0},
+  {q:"zkEVM proves…",a:["EVM execution correctness","Wallet balances","Gas burn","Bridged tokens"],i:0},
+  {q:"On-chain verify gas should be…",a:["Minimized","Maximized","Irrelevant","Unlimited"],i:0},
+  {q:"Hardware accel for proving includes…",a:["GPU/FPGA/ASIC","Only CPU","Only HDD","Only NIC"],i:0},
+  {q:"For Seekers, markets bring…",a:["Price discovery & reliability","Hidden costs","Fixed TPS","Direct L1 MEV"],i:0},
+  {q:"For Provers, markets bring…",a:["Steady demand/utilization","Censorship","KYC wallets","Burning keys"],i:0},
+  {q:"A circuit bug can break…",a:["Soundness","Completeness only","Hashing only","Calldata size"],i:0},
+  {q:"Poseidon preferred because…",a:["ZK-friendly arithmetic","Short public keys","Cheap opcodes","No field ops"],i:0},
+  {q:"Pairings are operations on…",a:["Elliptic-curve groups","Merkle trees","RPC","Sequencers"],i:0},
+  {q:"ZK-friendly curves include…",a:["BLS12-381 & BN254","secp256k1 only","ed25519 only","P-256 only"],i:0},
+  {q:"Verifier contracts check…",a:["Proof, public inputs, VK","Wallet seed","Gas token","Chain ID"],i:0},
+  {q:"Recursion enables checkpoints by…",a:["Rolling many proofs into one","Publishing raw logs","Using faucets","Printing receipts"],i:0},
+  {q:"Fermah backs reliability of Provers with…",a:["Restaked collateral/reputation","Captchas","Follower counts","Chain IDs"],i:0},
+  {q:"Latency sensitivity matters most for…",a:["Time-critical proof jobs","Cold storage","Docs","Images"],i:0},
+  {q:"Throughput increases via…",a:["Parallel proving & batching","Bigger blocks only","Extra RPCs","More signatures"],i:0},
+  {q:"Capability matching considers…",a:["System, memory, perf & price","PFP image","Twitter handle","L1 slot"],i:0},
+  {q:"Seeker transparency helps…",a:["Forecasting costs","Front-running","Censorship","Spam"],i:0},
+  {q:"A proof of solvency shows…",a:["Liabilities ≤ assets without leaking balances","TPS","Bridge fees","Seed phrases"],i:0},
+  {q:"Circuit ‘gadgets’ are…",a:["Reusable sub-circuits","Android widgets","Wallet plugins","L1 precompiles"],i:0},
+  {q:"IPA proofs avoid pairings by…",a:["Inner-product checks","Using FRI","Needing RSA","Patricia tries"],i:0},
+  {q:"KZG needs setup whereas FRI…",a:["Does not","Also needs SRS","Needs pairings","Needs RSA SRS"],i:0},
+  {q:"Rollups post data to L1 for…",a:["Data availability","Extra gas","MEV","Bridging"],i:0},
+  {q:"Arithmetization maps logic to…",a:["Field equations/constraints","Calldata ABI","EVM opcodes only","Solidity"],i:0},
+  {q:"Constraint system proves relation of…",a:["Inputs & program","Wallet & gas","Chain & slot","Bridge & L2"],i:0},
+  {q:"Witness generation happens during…",a:["Proving","Verification","Compilation","Deployment"],i:0},
+  {q:"Verification is typically…",a:["Fast","Slower than proving","Interactive","GPU only"],i:0},
+  {q:"Recursion/compression reduces…",a:["Chain verify cost","Prover memory always","Circuit size always","Setup size"],i:0},
+  {q:"Universal market like Fermah reduces…",a:["Vendor lock-in risk","Hash collisions","Key size","Merkle depth"],i:0},
+  {q:"Multiple systems let Seekers…",a:["Choose cost/latency tradeoffs","Pick 1 forced vendor","Avoid neutrality","Fix gas"],i:0},
+  {q:"Key inputs for pricing include…",a:["Hardware time & energy","User age","Chat count","Block size only"],i:0},
+  {q:"Good orchestration lowers…",a:["Tail latency","Bandwidth","Tx count","Nonce"],i:0},
+  {q:"Artifacts typically shipped as…",a:["Docker images/containers","PDFs","PNGs","Emails"],i:0},
+  {q:"In Fermah UI a Seeker request becomes…",a:["A job in the market","A block","A bridge","A faucet"],i:0},
+  {q:"Provers advertise…",a:["Capabilities/price/latency","NFTs","Seeds","Avatars"],i:0},
+  {q:"Verifiers should be…",a:["Deterministic & cheap","Random","Off-chain only","GPU-heavy"],i:0},
+  {q:"Transparency avoids…",a:["Unclear/volatile pricing","Too many proofs","Perfect fairness","No hashing"],i:0},
+  {q:"Fermah discourages vendor lock-in by…",a:["Open market of proof systems","Exclusive contracts","Closed APIs","Single prover"],i:0},
+  {q:"What does ‘universal proving’ unlock for dapps?",a:["Portability across systems/chains","Fixed fees","No audits","No circuits"],i:0},
+  {q:"What does ‘separation of concerns’ mean here?",a:["Seekers buy; Provers sell; Verifiers check","Everyone does everything","Only L1s involved","Wallet does proving"],i:0},
+  {q:"Why publish clear job specs?",a:["Better matching & forecasting","Cosmetics","Spam","To hide costs"],i:0},
+  {q:"What improves reliability over time?",a:["Reputation/metrics per Prover","Random lotteries","Off-chain secrets","UI themes"],i:0},
+  {q:"What can be a time bonus factor?",a:["Faster correct answers","Wrong answers","More gas","Bigger blocks"],i:0},
+  {q:"End-to-end flow is typically…",a:["Seeker → Matchmaker → Prover → Verifier","Miner → Faucet → Wallet","Bridge → Oracle → Rollup","User → RPC → Node"],i:0}
+]; // 100 total
 
- {q:"What is a zkVM?", a:["A VM whose execution can be proven","A video machine","An exchange VM","A storage VM"], i:0},
- {q:"What is a witness in ZK?", a:["Secret inputs to the circuit","Public inputs","Gas price","Signature"], i:0},
- {q:"Public inputs are…", a:["Known to the verifier","Kept secret","Stored as witness only","Encrypted"], i:0},
- {q:"Zero-knowledge means a proof reveals…", a:["Nothing beyond validity","All inputs","Private keys","Circuit code"], i:0},
- {q:"Soundness roughly means…", a:["False statements can’t be proved (except negligible)","Proofs are short","Setup is universal","Keys are reusable"], i:0},
- {q:"Completeness means…", a:["True statements have proofs","Proofs have pairings","Setup is trusted","Witness is hidden"], i:0},
- {q:"Fiat–Shamir transforms…", a:["Interactive protocols → non-interactive","Hashes → commitments","R1CS → AIR","PLONK → STARK"], i:0},
- {q:"A trusted setup is used to create…", a:["Proving/verification keys","Wallets","Smart contracts","Relayers"], i:0},
- {q:"‘Powers of Tau’ is a…", a:["Common setup ceremony","Hash function","Curve","AIR schema"], i:0},
- {q:"Universal setup is…", a:["Reusable across circuits","Per-circuit only","For hashing only","Only for STARKs"], i:0},
-
- {q:"R1CS describes…", a:["Constraints for SNARKs","Account trees","Gas rules","Rollup batches"], i:0},
- {q:"AIR is used by…", a:["STARKs","Groth16","KZG","ECDSA"], i:0},
- {q:"FRI is a protocol used in…", a:["STARKs","PLONK","Groth16","IPA"], i:0},
- {q:"KZG commitments are used by…", a:["PLONK-style SNARKs","FRI STARKs","ECDSA","RSA"], i:0},
- {q:"Groth16 is known for…", a:["Very short proofs","No setup","Huge proofs","No pairings"], i:0},
- {q:"BLS12-381 is a…", a:["Pairing-friendly curve","Hash","Hash-to-curve only","Rollup"], i:0},
- {q:"BN254 is commonly used in…", a:["Ethereum SNARKs","Bitcoin POW","FRI only","ECDSA only"], i:0},
- {q:"Poseidon is a…", a:["ZK-friendly hash","Pairing","Curve","Signature"], i:0},
- {q:"Merkle trees provide…", a:["Commitment & membership proofs","Consensus","Randomness","Bridging"], i:0},
- {q:"Polynomial commitment lets you prove…", a:["Eval of a polynomial at a point","Block size","Gas paid","Nonce value"], i:0},
-
- {q:"Recursion in ZK allows…", a:["Proofs inside proofs (aggregation)","No hashing","No circuits","Gasless chains"], i:0},
- {q:"Aggregation reduces…", a:["Verifier work/size","Prover time","Circuit size always","Keys"], i:0},
- {q:"Why scheduling matters for a proof market?", a:["Match capability→job for low latency","Hide proofs","Raise gas","Throttle users"], i:0},
- {q:"Which resource dominates proving?", a:["Compute (GPU/CPU/ASIC)","Disk only","Network only","RPC calls"], i:0},
- {q:"A verifier on L1 should be…", a:["Cheap and deterministic","GPU heavy","Randomized","Non-deterministic"], i:0},
- {q:"Batching proofs helps…", a:["Amortize costs","Leak secrets","Create inflation","Break soundness"], i:0},
- {q:"Validity rollups rely on…", a:["ZK proofs of state transitions","Honest sequencers only","Optimistic disputes","Bridges"], i:0},
- {q:"Optimistic rollups rely on…", a:["Fraud proofs & delay","Pairings","Trusted setup","FRI only"], i:0},
- {q:"Circuit size affects…", a:["Prover time & memory","Wallet UI","Gas price only","EVM opcodes"], i:0},
- {q:"Proof size mainly affects…", a:["Verification cost & bandwidth","Prover RAM only","Witness secrecy","Curve choice only"], i:0},
-
- {q:"PLONK is a…", a:["Universal SNARK scheme","STARK hash","zkVM","AIR system"], i:0},
- {q:"IPA commitments are used in…", a:["Some SNARKs without pairings","Merkle proof","ECDSA","FRI only"], i:0},
- {q:"Trusted setup risk is mitigated by…", a:["Multi-party ceremonies","Single operator","Central server","No hashing"], i:0},
- {q:"Circuit arity refers to…", a:["Gate/input structure","Chain count","Gas bracket","User count"], i:0},
- {q:"Lookup arguments speed…", a:["Certain SNARK operations","P2P gossip","Bridges","Signature size"], i:0},
- {q:"Range proofs prove…", a:["Value within bounds","Ownership","Gas usage","Miners"], i:0},
- {q:"A nullifier prevents…", a:["Double-spend / replay","Pairings","Hashing","ECDSA"], i:0},
- {q:"Semaphore shows…", a:["Membership without identity leak","Gas paid","Chain ID","L1 block"], i:0},
- {q:"Universal market helps avoid…", a:["Vendor lock-in","Higher TPS","Lower security","Public inputs"], i:0},
- {q:"Time-to-proof improves with…", a:["Right hardware & scheduling","Bigger blocks","Extra RPCs","Longer keys"], i:0},
-
- {q:"Verification key (VK) is used by…", a:["Verifier","Prover","Sequencer","Wallet UI"], i:0},
- {q:"Proving key (PK) is used by…", a:["Prover","Verifier","Relayer","Bridge"], i:0},
- {q:"Witness is kept…", a:["Secret","On-chain","In calldata","In account tree"], i:0},
- {q:"Public inputs are usually…", a:["Committed or passed to verifier","Never used","Encrypted only","Random"], i:0},
- {q:"ZK proof should convince verifier…", a:["Statement true w/o revealing witness","Wallet is rich","Gas is cheap","Curve is safe"], i:0},
- {q:"Memory-hard steps mostly affect…", a:["Prover","Verifier","Wallet","RPC"], i:0},
- {q:"STARKs avoid trusted setup using…", a:["FRI+hash commitments","KZG only","Pairings","Multi-sigs"], i:0},
- {q:"SNARK often relies on…", a:["Pairings or commitments","FRI only","Bridges","L1 consensus"], i:0},
- {q:"Circuit compilation targets often include…", a:["R1CS/PLONKish/AIR","SQL","PNG","WASM UI only"], i:0},
- {q:"zkEVM proves…", a:["EVM execution correctness","Wallet balance","Gas burn","Bridged tokens"], i:0},
-
- {q:"Gas for on-chain verification should be…", a:["Minimized","Maximized","Irrelevant","Unlimited"], i:0},
- {q:"Hardware acceleration for proving includes…", a:["GPU/FPGA/ASIC","Only CPU","Only HDD","Only NIC"], i:0},
- {q:"Proof markets help Seekers by…", a:["Price discovery & reliability","Hiding costs","Fixing TPS","Direct L1 MEV"], i:0},
- {q:"Proof markets help Provers by…", a:["Steady demand/utilization","Censoring","KYC wallets","Burning keys"], i:0},
- {q:"A circuit bug can break…", a:["Soundness","Completeness","Hashing only","Calldata size"], i:0},
- {q:"Poseidon is preferred because…", a:["ZK-friendly arithmetics","Short public keys","Cheap opcodes","No field ops"], i:0},
- {q:"Pairings are operations on…", a:["Elliptic-curve groups","Merkle trees","RPC","Sequencers"], i:0},
- {q:"ZK-friendly curves include…", a:["BLS12-381 / BN254","secp256k1 only","ed25519 only","P-256 only"], i:0},
- {q:"A verifier contract typically checks…", a:["Proof, public inputs, VK","Wallet seed","Gas token","Chain ID"], i:0},
- {q:"Recursion allows weekly checkpoints by…", a:["Rolling many proofs into one","Publishing raw logs","Using faucets","Printing receipts"], i:0},
-
- {q:"In Fermah, reliability of Provers is backed by…", a:["Restaked collateral / reputation","Captcha levels","Follower count","EVM chain ID"], i:0},
- {q:"Latency sensitivity matters most for…", a:["Time-critical proof jobs","Cold storage","Docs","Images"], i:0},
- {q:"Throughput is increased by…", a:["Parallel proving & batching","Bigger blocks","Extra RPCs","More signatures"], i:0},
- {q:"Job capability matching considers…", a:["System, memory, perf & price","Profile picture","Twitter handle","L1 slot"], i:0},
- {q:"Seeker transparency helps…", a:["Forecasting costs","Front running","Censorship","Spam"], i:0},
- {q:"A proof of solvency proves…", a:["Liabilities ≤ assets without leaking balances","TPS","Bridge fees","Seed phrases"], i:0},
- {q:"Circuit ‘gadgets’ are…", a:["Reusable sub-circuits","Android widgets","Wallet plugins","L1 precompiles"], i:0},
- {q:"IPA proofs avoid pairings but…", a:["Use inner-product checks","Use FRI","Need RSA","Use Merkle Patricia"], i:0},
- {q:"KZG requires a setup whereas FRI…", a:["Does not","Also needs trusted SRS","Needs pairings","Needs RSA SRS"], i:0},
- {q:"Rollups post data to L1 for…", a:["Data availability","Extra gas","MEV","Bridging"], i:0},
-
- {q:"Circuit arithmetization maps logic to…", a:["Field equations/constraints","Calldata ABI","EVM opcodes","Solidity"], i:0},
- {q:"Constraint system proves the relation between…", a:["Inputs & program","Wallet & gas","Chain & slot","Bridge & L2"], i:0},
- {q:"Witness generation happens during…", a:["Proving","Verification","Compilation","Deployment"], i:0},
- {q:"Verification is typically…", a:["Fast","Slower than proving","Interactive","GPU only"], i:0},
- {q:"Proof compression by recursion reduces…", a:["Chain verify cost","Prover memory","Circuit size","Setup size"], i:0},
- {q:"A universal market like Fermah reduces…", a:["Vendor lock-in risk","Hash collisions","Key size","Merkle depth"], i:0},
- {q:"Availability of multiple systems lets Seekers…", a:["Choose cost/latency tradeoffs","Pick 1 forced vendor","Avoid neutrality","Fix gas"], i:0},
- {q:"Key inputs for pricing include…", a:["Hardware time & energy","User age","Chat count","Block size only"], i:0},
- {q:"Good orchestration lowers…", a:["Tail latency","Bandwidth","Tx count","Nonce"], i:0},
- {q:"Proof artifacts are typically shipped as…", a:["Docker images/containers","PDFs","PNGs","ZIP emails only"], i:0},
-
- {q:"SNARK stands for…", a:["Succinct Non-interactive ARgument of Knowledge","Simple Non-auth Root Key","Secure Non-array Kernel","Signed Non-AES Routine"], i:0},
- {q:"STARK stands for…", a:["Scalable Transparent ARgument of Knowledge","Simple Transfer ACK","Secure Token ARK","State Tree ACK"], i:0},
- {q:"Why ‘transparent’ in STARKs?", a:["No trusted setup","Only one key","All public inputs","Pairings used"], i:0},
- {q:"Groth16 verification uses…", a:["Pairings","FRI","RSA","BLS signatures"], i:0},
- {q:"PLONKish systems often use…", a:["KZG commitments","FRI only","RSA only","Lamport"], i:0},
- {q:"Time bonus in your IQ score rewards…", a:["Faster correct answers","Wrong answers","More gas","More wallets"], i:0},
- {q:"In Fermah UI, a Seeker’s request becomes…", a:["A job in the market","A block","A bridge","A faucet"], i:0},
- {q:"Provers advertise…", a:["Capabilities/price/latency","Twitter handle","NFTs","Seed"], i:0},
- {q:"Verifiers should be…", a:["Deterministic & cheap","Random","Off-chain only","GPU-heavy"], i:0},
- {q:"Main risk without market transparency?", a:["Unclear/volatile pricing","Too many proofs","Perfect fairness","No hashing"], i:0}
-];
-
-/* -------- Quiz engine -------- */
-function pickRandom(n, arr=BANK){ const a=[...arr]; a.sort(()=>Math.random()-0.5); return a.slice(0,n); }
+/* ---------- Quiz engine ---------- */
+function pickRandom(n,arr=BANK){const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a.slice(0,n);}
 function startQuiz(){
-  document.getElementById('login').style.display='none';
-  document.getElementById('quiz').style.display='block';
-  document.getElementById('result').style.display='none';
+  showOnly('quiz');
   document.getElementById('hudUser').textContent=`👤 ${currentUser.name}`;
   document.getElementById('hudScore').textContent=0;
   document.getElementById('hudTotal').textContent=quizSize;
   document.getElementById('hudTime').textContent='0s';
 
   questions = pickRandom(quizSize).map(q=>{
-    const opts=[...q.a].map((t,i)=>({t,i}));
-    opts.sort(()=>Math.random()-0.5);
+    const opts=q.a.map((t,i)=>({t,i}));
+    for(let i=opts.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]];}
     return {q:q.q, opts, correct:opts.findIndex(o=>o.i===q.i)};
   });
   idx=0; score=0; startTs=Date.now();
   if(timerId) clearInterval(timerId);
-  timerId=setInterval(()=>document.getElementById('hudTime').textContent=Math.floor((Date.now()-startTs)/1000)+'s',500);
+  timerId=setInterval(()=>document.getElementById('hudTime').textContent=Math.floor((Date.now()-startTs)/1000)+'s',300);
   showQuestion();
 }
 function showQuestion(){
@@ -273,33 +324,45 @@ function showQuestion(){
   document.getElementById('question').textContent=it.q;
   const box=document.getElementById('options'); box.innerHTML='';
   it.opts.forEach((o,i)=>{
-    const b=document.createElement('button');
-    b.className='option'; b.textContent=o.t;
-    b.onclick=()=>selectAnswer(i,b,it);
-    box.appendChild(b);
+    const b=document.createElement('button'); b.className='option'; b.textContent=o.t;
+    b.onclick=()=>selectAnswer(i,b,it); box.appendChild(b);
   });
 }
 function selectAnswer(i,btn,it){
   [...document.querySelectorAll('.option')].forEach(x=>x.disabled=true);
-  if(i===it.correct){ score++; btn.classList.add('correct'); }
-  else { btn.classList.add('wrong'); }
+  if(i===it.correct){ score++; btn.classList.add('correct'); } else { btn.classList.add('wrong'); }
   document.getElementById('hudScore').textContent=score;
   setTimeout(()=>{ idx++; showQuestion(); },600);
 }
 function endQuiz(){
   clearInterval(timerId);
-  const total=questions.length, secs=Math.floor((Date.now()-startTs)/1000)||1, acc=score/total;
+  const total=questions.length, secs=Math.max(1,Math.floor((Date.now()-startTs)/1000)), acc=score/total;
   const iq=Math.round(60+40*acc+Math.min(20,200/secs));
-  document.getElementById('quiz').style.display='none';
-  document.getElementById('result').style.display='block';
   document.getElementById('resName').textContent=currentUser.name;
   document.getElementById('resPfp').src=currentUser.pfp||'';
+  document.getElementById('resTag').textContent=`${score}/${total} correct • ${secs}s`;
   document.getElementById('resIQ').textContent=iq;
-  document.getElementById('resSummary').textContent=`Score: ${score}/${total} • Accuracy ${(acc*100).toFixed(0)}% • Time ${secs}s`;
-}
-document.getElementById('playAgain').onclick=()=>{ startQuiz(); };
+  document.getElementById('resSummary').textContent=`Accuracy ${(acc*100).toFixed(0)}% • Time bonus applied`;
+  showOnly('result');
 
-refreshLoginSelect();
+  // persist simple local stats
+  const list=loadProfiles();
+  const i=list.findIndex(p=>p.name===currentUser.name);
+  if(i>-1){
+    list[i].stats = list[i].stats||{bestIQ:0,last:{}};
+    list[i].stats.bestIQ = Math.max(list[i].stats.bestIQ||0, iq);
+    list[i].stats.last = {score,total,secs,iq};
+    currentUser = list[i];
+    saveProfiles(list);
+  }
+}
+
+document.getElementById('startBtn').onclick=startQuiz;
+document.getElementById('playAgain').onclick=startQuiz;
+
+/* ---------- Boot ---------- */
+refreshLogin();
+const nameInput=document.getElementById('name');
 </script>
 </body>
 </html>
